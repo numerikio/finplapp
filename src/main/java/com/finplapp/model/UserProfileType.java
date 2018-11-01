@@ -1,0 +1,20 @@
+package com.finplapp.model;
+
+import java.io.Serializable;
+
+public enum UserProfileType implements Serializable{
+	USER("USER"),
+	ANALYST("ANALYST"),
+	ADMIN("ADMIN");
+	
+	String userProfileType;
+	
+	private UserProfileType(String userProfileType){
+		this.userProfileType = userProfileType;
+	}
+	
+	public String getUserProfileType(){
+		return userProfileType;
+	}
+	
+}
