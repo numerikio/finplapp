@@ -91,7 +91,7 @@ public class AppController {
         periodOfTimes.add(periodOfTime);
         user.setPeriodOfTimes(periodOfTimes);
         userService.saveUser(user);
-       // periodOfTimeService.savePeriodOfTime(periodOfTime);
+        // periodOfTimeService.savePeriodOfTime(periodOfTime);
         return null;
     }
 
@@ -101,9 +101,9 @@ public class AppController {
     @RequestMapping(value = {"/newuser"}, method = RequestMethod.GET)
     public String newUser(ModelMap model) {
         User user = new User();
-        Set<UserProfile> userProfiles = new HashSet<>();
-        userProfiles.add(userProfileService.findByType("USER"));
-        user.setUserProfiles(userProfiles);
+//        Set<UserProfile> userProfiles = new HashSet<>();
+//        userProfiles.add(userProfileService.findByType("USER"));
+//        user.setUserProfiles(userProfiles);
         System.out.println(user.getUserProfiles());
         model.addAttribute("user", user);
         model.addAttribute("edit", false);
@@ -129,6 +129,9 @@ public class AppController {
             result.addError(ssoError);
             return "registration";
         }
+        Set<UserProfile> userProfiles = new HashSet<>();
+        userProfiles.add(userProfileService.findByType("USER"));
+        user.setUserProfiles(userProfiles);
         userService.saveUser(user);
         model.addAttribute("loggedinuser", getPrincipal());
         return "registrationsuccess";
