@@ -21,7 +21,7 @@
                 <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus-sign"></i></a>
                 <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus-sign"></i></a>
                 <a href="getEvents" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></a>
-                <a href="/fpapp/logout" class="btn btn-primary">${loggedinuser} <i class="glyphicon glyphicon-log-out"></i></a>
+                <a href="/logout" class="btn btn-primary">${loggedinuser} <i class="glyphicon glyphicon-log-out"></i></a>
             </div>
 
         </div>

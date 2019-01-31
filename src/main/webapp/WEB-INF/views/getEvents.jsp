@@ -17,7 +17,7 @@
                 <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus-sign"></i></a>
                 <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus-sign"></i></a>
                 <a href="#" class="btn btn-primary disabled"><i class="glyphicon glyphicon-stats" aria-disabled="true"></i></a>
-                <a href="/fpapp/" class="btn btn-primary"><i class="glyphicon glyphicon-home"></i></a>
+                <a href="/" class="btn btn-primary"><i class="glyphicon glyphicon-home"></i></a>
             </div>
 
         </div>
