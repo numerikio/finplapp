@@ -7,5 +7,10 @@ public enum CostType {
     TRANSPORT,
     HOBBY,
     HOLIDAY,
-    SOMETHING_OTHER
+    SOMETHING_OTHER;
+
+    @Override
+    public String toString() {
+        return this.name();
+    }
 }

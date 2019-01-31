@@ -1,14 +1,20 @@
 package com.finplapp.controller;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.finplapp.model.PeriodOfTime;
-import com.finplapp.model.UserProfile;
-import com.finplapp.service.PeriodOfTimeService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.finplapp.model.*;
+import com.finplapp.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.SessionAttributes;
-
-import com.finplapp.model.User;
-import com.finplapp.service.UserProfileService;
-import com.finplapp.service.UserService;
+import org.springframework.web.bind.annotation.*;
 
 
 @Controller
@@ -60,17 +58,42 @@ public class AppController {
     private AuthenticationTrustResolver authenticationTrustResolver;
 
     @Autowired
-    // @Qualifier("tokenRepositoryImpl")
     private PersistentTokenRepository tokenRepository;
 
     @Autowired
     private PeriodOfTimeService periodOfTimeService;
 
+    @Autowired
+    @Qualifier("costService")
+    private CostService costService;
+
+    @Autowired
+    @Qualifier("incomeService")
+    private IncomeService incomeService;
+
 
     /**
      * This method will list all existing users.
      */
-    @RequestMapping(value = {"/", "/list"}, method = RequestMethod.GET)
+
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String mainPage(ModelMap model) throws IOException {
+        ArrayList<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
+        updateDatasOfPeriod(periodOfTimes);
+
+        ArrayList<ArrayList> arrayLists = new ArrayList<>();
+        arrayLists.add(getBalanceListAllPeriods(periodOfTimes));
+
+        DataForChart dataForChart = new DataForChart(getTimeStepAllPeriodForGraf(periodOfTimes), arrayLists);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jString = objectMapper.writeValueAsString(dataForChart);
+        System.out.println(jString);
+        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("data", jString);
+        return "mainPage";
+    }
+
+    @RequestMapping(value = "/userslist", method = RequestMethod.GET)
     public String listUsers(ModelMap model) {
 
         List<User> users = userService.findAllUsers();
@@ -79,21 +102,110 @@ public class AppController {
         return "userslist";
     }
 
+    //======================Events=================================
 
-    @RequestMapping(value = "/ttt", method = RequestMethod.GET)
-    public String testsc() {
-        System.out.println("user - " + getPrincipal());
-        User user = userService.findBySSO(getPrincipal());
-        PeriodOfTime periodOfTime = new PeriodOfTime();
-        periodOfTime.setUser(user);
-        periodOfTime.setData("12/1/2009");
-        Set<PeriodOfTime> periodOfTimes = user.getPeriodOfTimes();
-        periodOfTimes.add(periodOfTime);
-        user.setPeriodOfTimes(periodOfTimes);
-        userService.saveUser(user);
-        // periodOfTimeService.savePeriodOfTime(periodOfTime);
-        return null;
+    @RequestMapping("getEvents")
+    public String getEvents() {
+        return "getEvents";
     }
+
+    @RequestMapping("getAllEventOfDate")
+    public String getAllEventOfDate(@RequestParam("dates") String dates, ModelMap model) {
+        List<PeriodOfTime> periodOfTimes = getActualPeriodsOfTime(getAllDatesOfPeriod(getFirstAndLastDaysWihtString(dates)));
+        model.addAttribute("periodOfTimes", periodOfTimes);
+        model.addAttribute("dates", dates);
+        return "eventsList";
+
+    }
+    //====================End Events=============================
+
+    //======================Cost=================================
+
+    @RequestMapping(value = {"Cost"}, method = RequestMethod.GET)
+    public String pageCost(ModelMap model) {
+        model.addAttribute("costTypes", CostType.values());
+        return "costPage";
+    }
+
+    @RequestMapping(value = "saveCost")
+    public String saveCost(@RequestParam("date") String date,
+                           @RequestParam("costTypes") String costTypes,
+                           @RequestParam("amount") String amount,
+                           @RequestParam("message") String message) {
+
+        Cost cost = new Cost();
+        cost.setAmount(Double.valueOf(amount));
+        cost.setMessage(message);
+        cost.setTypeCost(CostType.valueOf(costTypes));
+
+        User user = userService.findBySSO(getPrincipal());
+        PeriodOfTime periodOfTime = getNewOrOldPeriodOfTime(getLocalDateWithString(date), user);
+        cost.setPeriodOfTime(periodOfTime);
+        List<Cost> costList = periodOfTime.getCostList();
+        costList.add(cost);
+        periodOfTime.setCostList(costList);
+        periodOfTimeService.savePeriodOfTime(periodOfTime);
+        return "redirect:/Cost";
+    }
+
+    @RequestMapping(value = "delete-cost")
+    public String deleteCost(@RequestParam("dates") String dates,
+                             @RequestParam("date") String date,
+                             @RequestParam("cost.id") Long id,
+                             ModelMap model) {
+        PeriodOfTime periodOfTime = periodOfTimeService.findByLocalDateAndUser(getLocalDateWithString(date), userService.findBySSO(getPrincipal()));
+        periodOfTime.getCostList().remove(costService.findCostById(id));
+        costService.deleteCost(id);
+        deleteAllEmptiesPeriodsOfUser(userService.findBySSO(getPrincipal()));
+        model.addAttribute("dates", dates);
+        return "redirect:/getAllEventOfDate";
+    }
+
+    //===================End Cost=================================
+
+    //======================Income=================================
+
+    @RequestMapping(value = {"Income"}, method = RequestMethod.GET)
+    public String pageIncome(ModelMap model) {
+        model.addAttribute("incomeTypes", IncomeType.values());
+        return "incomePage";
+    }
+
+    @RequestMapping(value = "saveIncome")
+    public String saveIncome(@RequestParam("date") String date,
+                             @RequestParam("incomeTypes") String incomeTypes,
+                             @RequestParam("amount") String amount,
+                             @RequestParam("message") String message) {
+
+        Income income = new Income();
+        income.setAmount(Double.valueOf(amount));
+        income.setMessage(message);
+        income.setTypeIncome(IncomeType.valueOf(incomeTypes));
+
+        User user = userService.findBySSO(getPrincipal());
+        PeriodOfTime periodOfTime = getNewOrOldPeriodOfTime(getLocalDateWithString(date), user);
+        income.setPeriodOfTime(periodOfTime);
+        List<Income> incomeList = periodOfTime.getIncomeList();
+        incomeList.add(income);
+        periodOfTime.setIncomeList(incomeList);
+        periodOfTimeService.savePeriodOfTime(periodOfTime);
+        return "redirect:/Income";
+    }
+
+    @RequestMapping(value = "delete-income")
+    public String deleteIncome(@RequestParam("dates") String dates,
+                               @RequestParam("date") String date,
+                               @RequestParam("income.id") Long id,
+                               ModelMap model) {
+        PeriodOfTime periodOfTime = periodOfTimeService.findByLocalDateAndUser(getLocalDateWithString(date), userService.findBySSO(getPrincipal()));
+        periodOfTime.getIncomeList().remove(incomeService.findIncomeById(id));
+        incomeService.deleteIncome(id);
+        deleteAllEmptiesPeriodsOfUser(userService.findBySSO(getPrincipal()));
+        model.addAttribute("dates", dates);
+        return "redirect:/getAllEventOfDate";
+    }
+
+    //===================End Income=================================
 
     /**
      * This method will provide the medium to add a new user.
@@ -101,9 +213,6 @@ public class AppController {
     @RequestMapping(value = {"/newuser"}, method = RequestMethod.GET)
     public String newUser(ModelMap model) {
         User user = new User();
-//        Set<UserProfile> userProfiles = new HashSet<>();
-//        userProfiles.add(userProfileService.findByType("USER"));
-//        user.setUserProfiles(userProfiles);
         System.out.println(user.getUserProfiles());
         model.addAttribute("user", user);
         model.addAttribute("edit", false);
@@ -137,7 +246,6 @@ public class AppController {
         return "registrationsuccess";
     }
 
-
     /**
      * This method will provide the medium to update an existing user.
      */
@@ -145,6 +253,7 @@ public class AppController {
     public String editUser(@PathVariable String ssoId, ModelMap model) {
         User user = userService.findBySSO(ssoId);
         model.addAttribute("user", user);
+        model.addAttribute("roles", userProfileService.findAll());
         model.addAttribute("edit", true);
         model.addAttribute("loggedinuser", getPrincipal());
         return "registration";
@@ -175,7 +284,7 @@ public class AppController {
     public String deleteUser(@PathVariable String ssoId) {
         userService.deleteUserBySSO(ssoId);
         tokenRepository.removeUserTokens(ssoId);
-        return "redirect:/list";
+        return "redirect:/userslist";
     }
 
     /**
@@ -204,7 +313,7 @@ public class AppController {
         if (isCurrentAuthenticationAnonymous()) {
             return "login";
         } else {
-            return "redirect:/list";
+            return "redirect:/";
         }
     }
 
@@ -246,5 +355,109 @@ public class AppController {
         return authenticationTrustResolver.isAnonymous(authentication);
     }
 
+    private PeriodOfTime getNewOrOldPeriodOfTime(LocalDate localDate, User user) {
+        PeriodOfTime findPeriodOfTime = periodOfTimeService.findByLocalDateAndUser(localDate, user);
+        if (findPeriodOfTime == null) {
+            PeriodOfTime newPeriodOfTime = new PeriodOfTime();
+            newPeriodOfTime.setUser(user);
+            newPeriodOfTime.setLocalDate(localDate);
+            return newPeriodOfTime;
+        } else {
+            return findPeriodOfTime;
+        }
+    }
 
+    private void updateDatasOfPeriod(ArrayList<PeriodOfTime> periodOfTimes) {
+        for (int i = 0; i < periodOfTimes.size(); i++) {
+            Double calculationOfPeriod = getSumEventsOfPeridofTime(periodOfTimes.get(i).getIncomeList()) - getSumEventsOfPeridofTime(periodOfTimes.get(i).getCostList());
+            if (i != 0) {
+                periodOfTimes.get(i).setBalance(periodOfTimes.get(i - 1).getBalance() + calculationOfPeriod);
+            } else {
+                periodOfTimes.get(i).setBalance(calculationOfPeriod);
+            }
+            periodOfTimeService.updatePeriodOfTime(periodOfTimes.get(i));
+        }
+    }
+
+    private ArrayList<PeriodOfTime> getSortedPeriodOfTimeList() {
+        ArrayList<PeriodOfTime> periodOfTimes = (ArrayList<PeriodOfTime>) periodOfTimeService.findByUser(userService.findBySSO(getPrincipal()));
+        periodOfTimes.sort((o1, o2) -> o1.compareTo(o2));
+        return periodOfTimes;
+    }
+
+    private Double getSumEventsOfPeridofTime(List<? extends Event> eventList) {
+        Double sum = 0.0;
+        for (Event event : eventList
+        ) {
+            sum += event.getAmount();
+        }
+        return sum;
+    }
+
+    private ArrayList<Double> getBalanceListAllPeriods(ArrayList<PeriodOfTime> periodOfTimes) {
+        ArrayList<Double> balanseList = new ArrayList<>();
+        for (PeriodOfTime periodOfTime : periodOfTimes
+        ) {
+            balanseList.add(periodOfTime.getBalance());
+        }
+        return balanseList;
+    }
+
+    private ArrayList<String> getTimeStepAllPeriodForGraf(ArrayList<PeriodOfTime> periodOfTimes) {
+        ArrayList<String> timeSteps = new ArrayList<>();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM");
+        for (PeriodOfTime periodOfTime : periodOfTimes
+        ) {
+            timeSteps.add(periodOfTime.getLocalDate().format(dateTimeFormatter));
+        }
+        return timeSteps;
+    }
+
+
+    private LocalDate getLocalDateWithString(String date) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("[MM/dd/yyyy][yyyy-MM-dd]");
+        LocalDate localDate = LocalDate.parse(date, dateTimeFormatter);
+        return localDate;
+    }
+
+    private List<String> getFirstAndLastDaysWihtString(String datesSring) {
+        return Stream.of(datesSring.split(" - "))
+                .map(elem -> new String(elem))
+                .collect(Collectors.toList());
+    }
+
+    private List<LocalDate> getAllDatesOfPeriod(List<String> dates) {
+        ArrayList<LocalDate> localDates = new ArrayList<>();
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        LocalDate theFirstDay = LocalDate.parse(dates.get(0), dateTimeFormatter);
+        LocalDate thelastDay = LocalDate.parse(dates.get(1), dateTimeFormatter);
+
+        long days = ChronoUnit.DAYS.between(theFirstDay, thelastDay);
+        long oneDeyForCorrectWork = 1L;
+        for (long i = 0; i < days + oneDeyForCorrectWork; i++) {
+            localDates.add(theFirstDay.plusDays(i));
+        }
+        return localDates;
+    }
+
+    private List<PeriodOfTime> getActualPeriodsOfTime(List<LocalDate> localDates) {
+        List<PeriodOfTime> periodOfTimes = new ArrayList<>();
+        for (LocalDate localDate : localDates
+        ) {
+            PeriodOfTime periodOfTime =periodOfTimeService.findByLocalDateAndUser(localDate, userService.findBySSO(getPrincipal()));
+            if(periodOfTime!=null) {
+                periodOfTimes.add(periodOfTime);
+            }
+        }
+        return periodOfTimes;
+    }
+
+    private void deleteAllEmptiesPeriodsOfUser(User user) {
+        List<PeriodOfTime> periodOfTimes = periodOfTimeService.findEmptiesPeriods(user);
+        for (PeriodOfTime period : periodOfTimes
+        ) {
+            periodOfTimeService.deletePeriodOfTime(period);
+        }
+    }
 }

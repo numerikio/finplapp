@@ -7,17 +7,18 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<title>Registration Confirmation Page</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
 <body>
 	<div class="generic-container">
-		<%@include file="authheader.jsp" %>
 		
 		<div class="alert alert-success lead">
 	    	${success}
 		</div>
 		
 		<span class="well floatRight">
-			Go to <a href="<c:url value='/list' />">Users List</a>
+		    Successful registration.
+			Go to <a href="<c:url value='/' />">login</a> page.
 		</span>
 	</div>
 </body>

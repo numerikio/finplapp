@@ -8,6 +8,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<title>Users List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
 
 <body>
@@ -19,27 +20,19 @@
 			<table class="table table-hover">
 	    		<thead>
 		      		<tr>
-				        <%--<th>Firstname</th>
-				        <th>Lastname</th>--%>
 				        <th>Email</th>
 				        <th>SSO ID</th>
-				        <sec:authorize access="hasRole('ADMIN')">
-				        	<th width="100"></th>
-				        </sec:authorize>
-				        <sec:authorize access="hasRole('ADMIN')">
-				        	<th width="100"></th>
-				        </sec:authorize>
-				        
+				        <th width="100"></th>
+				        <th width="100"></th>
+
 					</tr>
 		    	</thead>
 	    		<tbody>
 				<c:forEach items="${users}" var="user">
 					<tr>
-						<%--<td>${user.firstName}</td>
-						<td>${user.lastName}</td>--%>
 						<td>${user.email}</td>
 						<td>${user.ssoId}</td>
-					    <sec:authorize access="hasRole('ADMIN') or hasRole('DBA')">
+					    <sec:authorize access="hasRole('ADMIN')">
 							<td><a href="<c:url value='/edit-user-${user.ssoId}' />" class="btn btn-success custom-width">edit</a></td>
 				        </sec:authorize>
 				        <sec:authorize access="hasRole('ADMIN')">

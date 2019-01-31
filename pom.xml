@@ -117,6 +117,7 @@
 		</dependency>
 
 		<!-- Servlet+JSP+JSTL -->
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -131,6 +132,14 @@
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>jstl</artifactId>
 		    <version>1.2</version>
+		</dependency>
+
+		<!-- jackson -->
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.4</version>
 		</dependency>
 
 
@@ -168,7 +177,7 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>3.2.2</version>
 				<configuration>
-					<webappDirectory>C:\Program Files\apache-tomcat-8.5.32\webapps\fpapp</webappDirectory>
+					<webappDirectory>C:\Program Files\apache-tomcat-8.5.37\webapps\fpapp</webappDirectory>
 				</configuration>
 			</plugin>
 		</plugins>

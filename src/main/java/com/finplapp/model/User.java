@@ -27,7 +27,7 @@ public class User implements Serializable{
 	@Column(name="EMAIL", nullable=false)
 	private String email;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "APP_USER_USER_PROFILE", 
              joinColumns = { @JoinColumn(name = "USER_ID") }, 
              inverseJoinColumns = { @JoinColumn(name = "USER_PROFILE_ID") })
@@ -132,11 +132,11 @@ public class User implements Serializable{
 	}
 
 
-	public Set<PeriodOfTime> getPeriodOfTimes() {
+	/*public Set<PeriodOfTime> getPeriodOfTimes() {
 		return periodOfTimes;
-	}
+	}*/
 
-	public void setPeriodOfTimes(Set<PeriodOfTime> periodOfTimes) {
+	/*public void setPeriodOfTimes(Set<PeriodOfTime> periodOfTimes) {
 		this.periodOfTimes = periodOfTimes;
-	}
+	}*/
 }
