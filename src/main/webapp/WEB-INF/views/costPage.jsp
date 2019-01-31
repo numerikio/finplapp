@@ -17,6 +17,7 @@
     <%@include file="navbar.jsp" %>
     <br>
     <br>
+
     <div class="container">
         <form action="saveCost">
             <h2>Add cost</h2>

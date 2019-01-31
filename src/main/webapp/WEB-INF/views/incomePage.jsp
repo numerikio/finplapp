@@ -19,6 +19,7 @@
              <h2>Add income</h2>
             <%@include file="calendar.jsp" %>
             <br>
+
             <div class="form-group-lg input-group">
                 <span class="input-group-addon" id="addon-type"><i class="glyphicon glyphicon-list-alt"></i></span>
                 <select name="incomeTypes" id="incomeTypes" class="form-control" aria-describedby="addon-type">

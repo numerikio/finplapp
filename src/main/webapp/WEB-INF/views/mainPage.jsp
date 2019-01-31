@@ -16,12 +16,14 @@
 <body>
     <nav class="navbar-lg navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
+
             <div class="btn-group-lg btn-group-justified">
                 <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus-sign"></i></a>
                 <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus-sign"></i></a>
                 <a href="getEvents" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></a>
                 <a href="/fpapp/logout" class="btn btn-primary">${loggedinuser} <i class="glyphicon glyphicon-log-out"></i></a>
             </div>
+
         </div>
     </nav>
     <br>

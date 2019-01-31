@@ -12,16 +12,19 @@
 <body>
     <nav class="navbar-lg navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
+
             <div class="btn-group-lg btn-group-justified">
                 <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus-sign"></i></a>
                 <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus-sign"></i></a>
                 <a href="#" class="btn btn-primary disabled"><i class="glyphicon glyphicon-stats" aria-disabled="true"></i></a>
                 <a href="/fpapp/" class="btn btn-primary"><i class="glyphicon glyphicon-home"></i></a>
             </div>
+
         </div>
     </nav>
-    <br>
-    <br>
+   <br>
+   <br>
+
     <div class="container">
         <form action="getAllEventOfDate">
             <h2>View events</h2>
