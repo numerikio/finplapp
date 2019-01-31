@@ -14,20 +14,12 @@
 
 <body>
 
+    <%@include file="navbar.jsp" %>
+    <br>
+    <br>
     <div class="container">
         <form action="saveCost">
-            <div class="row">
-                            <div class="col-md-3 col-lg-3 col-sm-3 col-xs-3">
-                                <h2>Add cost</h2>
-                            </div>
-
-                            <div class="col-md-1 col-md-offset-8 col-lg-1 col-lg-offset-8 col-sm-1 col-sm-offset-8 col-xs-1 col-xs-offset-8">
-                                <br>
-                                <a href="/fpapp/" class="btn-lg btn-primary pull-right"><i class="glyphicon glyphicon-home"></i></a>
-
-
-                            </div>
-                        </div>
+            <h2>Add cost</h2>
 
             <%@include file="calendar.jsp" %>
 

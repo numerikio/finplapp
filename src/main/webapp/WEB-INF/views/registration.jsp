@@ -13,8 +13,6 @@
 
 <body>
  	<div class="container">
-		<%@include file="authheader.jsp" %>
-
 		<h2>User Registration Form</h2>
 	 	<form:form method="POST" modelAttribute="user" class="form-horizontal">
 			<form:input type="hidden" path="id" id="id"/>

@@ -87,7 +87,7 @@ public class AppController {
         DataForChart dataForChart = new DataForChart(getTimeStepAllPeriodForGraf(periodOfTimes), arrayLists);
         ObjectMapper objectMapper = new ObjectMapper();
         String jString = objectMapper.writeValueAsString(dataForChart);
-        System.out.println(jString);
+
         model.addAttribute("loggedinuser", getPrincipal());
         model.addAttribute("data", jString);
         return "mainPage";

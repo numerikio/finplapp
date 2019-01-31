@@ -14,21 +14,18 @@
 </head>
 
 <body>
-    <%@include file="authheader.jsp" %>
-
-    <div class="conteiner">
-        <div class="row">
-
+    <nav class="navbar-lg navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
             <div class="btn-group-lg btn-group-justified">
-                <a href="Cost" class="btn btn-info"><i class="glyphicon glyphicon-minus-sign"></i></a>
-                <a href="Income" class="btn btn-info"><i class="glyphicon glyphicon-plus-sign"></i></a>
-                <a href="getEvents" class="btn btn-info"><i class="glyphicon glyphicon-search"></i></a>
+                <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus-sign"></i></a>
+                <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus-sign"></i></a>
+                <a href="getEvents" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></a>
+                <a href="/fpapp/logout" class="btn btn-primary">${loggedinuser} <i class="glyphicon glyphicon-log-out"></i></a>
             </div>
         </div>
-    </div>
-
-
-
+    </nav>
+    <br>
+    <br>
 
     <sec:authorize access="hasRole('ADMIN')">
         <td><a href="<c:url value='/userslist' />" class="btn btn-success custom-width">userslist</a></td>
@@ -41,11 +38,10 @@
     <div class="ct-chart ct-major-tenth"></div>
 
 
-    <script src="static/chartist/dist/chartist.js" />
-    </script>
+    <script src="static/chartist/dist/chartist.js"></script>
     <script src="static/chartist/dist/chartist-plugin-threshold.js"></script>
-    <script>
 
+    <script>
         var data = ${data};
         new Chartist.Line('.ct-chart', data, {
             showArea: true,

@@ -1,11 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page isELIgnored="false" %>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 
 <html>
 
 <head>
-    <title>Events</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
 
@@ -15,24 +13,12 @@
             <div class="btn-group-lg btn-group-justified">
                 <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus-sign"></i></a>
                 <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus-sign"></i></a>
-                <a href="#" class="btn btn-primary disabled"><i class="glyphicon glyphicon-stats" aria-disabled="true"></i></a>
+                <a href="getEvents" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></a>
                 <a href="/fpapp/" class="btn btn-primary"><i class="glyphicon glyphicon-home"></i></a>
             </div>
         </div>
     </nav>
-    <br>
-    <br>
-    <div class="container">
-        <form action="getAllEventOfDate">
-            <h2>View events</h2>
 
-            <%@include file="calendarWithPeriod.jsp" %>
-            <br>
-            <button type="submit" class="btn-lg btn-primary"><i class="glyphicon glyphicon-search"></i></button>
-
-        </form>
-
-    </div>
 </body>
 
 </html>
