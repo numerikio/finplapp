@@ -46,8 +46,6 @@ public class DataInit {
                 userProfileService.saveUserProfile(userProfile);
             }
         }
-        System.out.println(environment.getProperty("data.admin.email"));
-
     }
 
     private void addAdminDataToDB() {
