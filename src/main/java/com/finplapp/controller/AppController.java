@@ -19,7 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -71,12 +74,11 @@ public class AppController {
     @Qualifier("incomeService")
     private IncomeService incomeService;
 
-
     /**
      * This method will list all existing users.
      */
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(value = "/",method = RequestMethod.GET)
     public String mainPage(ModelMap model) throws IOException {
         ArrayList<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
         updateDatasOfPeriod(periodOfTimes);
@@ -445,8 +447,8 @@ public class AppController {
         List<PeriodOfTime> periodOfTimes = new ArrayList<>();
         for (LocalDate localDate : localDates
         ) {
-            PeriodOfTime periodOfTime =periodOfTimeService.findByLocalDateAndUser(localDate, userService.findBySSO(getPrincipal()));
-            if(periodOfTime!=null) {
+            PeriodOfTime periodOfTime = periodOfTimeService.findByLocalDateAndUser(localDate, userService.findBySSO(getPrincipal()));
+            if (periodOfTime != null) {
                 periodOfTimes.add(periodOfTime);
             }
         }

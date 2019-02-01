@@ -17,6 +17,7 @@
 		<hibernate.version>4.3.11.Final</hibernate.version>
 		<h2.connector.version>1.4.197</h2.connector.version>
 		<slf4j.version>1.7.5</slf4j.version>
+		<mysql.version>8.0.14</mysql.version>
 	</properties>
 
 	<dependencies>
@@ -95,21 +96,6 @@
 			<version>5.1.3.Final</version>
 		</dependency>
 
-		<!-- DB -->
-		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-		<!--dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.14</version>
-		</dependency-->
-
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>${h2.connector.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
 		<!-- slf4j/slf4j-log4j12-->
 
 		<dependency>
@@ -165,6 +151,48 @@
 		</dependency>
 
 	</dependencies>
+
+<profiles>
+	<profile>
+		<id>develop</id>
+		<activation>
+			<activeByDefault>true</activeByDefault>
+		</activation>
+		<build>
+			<resources>
+				<resource>
+					<directory>src/main/resources/develop</directory>
+				</resource>
+			</resources>
+		</build>
+		<dependencies>
+			<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+					<version>${h2.connector.version}</version>
+					<scope>runtime</scope>
+			</dependency>
+		</dependencies>
+	</profile>
+
+	<profile>
+		<id>deploy</id>
+		<build>
+			<resources>
+				<resource>
+					<directory>src/main/resources/deploy</directory>
+				</resource>
+			</resources>
+		</build>
+		<dependencies>
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql.version}</version>
+			</dependency>
+		</dependencies>
+	</profile>
+</profiles>
 
 	<build>
 		<finalName>fpapp</finalName>
