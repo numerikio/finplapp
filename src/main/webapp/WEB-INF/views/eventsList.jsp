@@ -22,7 +22,7 @@
             <table class="table table-condensed">
                 <thead>
                     <tr>
-                        <th>Amaunt</th>
+                        <th>amount</th>
                         <th>messege</th>
                         <th width="100"></th>
                     </tr>

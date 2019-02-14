@@ -4,6 +4,7 @@ import javax.persistence.*;
 
 @MappedSuperclass
 public abstract class Event {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -15,7 +16,6 @@ public abstract class Event {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "period_id")
     private PeriodOfTime periodOfTime;
-
 
     public Long getId() {
         return id;

@@ -33,12 +33,12 @@
             <br>
             <div class="form-group-lg input-group">
                 <span class="input-group-addon" id="addon-amaunt"><i class="glyphicon glyphicon-usd"></i></span>
-                <input type="number" autocomplete="off" class="form-control" aria-describedby="addon-amaunt" name="amount" id="amount" placeholder="amaunt" pattern="^[ 0-9]+$" required title="only numbers please" />
+                <input type="number" autocomplete="off" class="form-control" aria-describedby="addon-amaunt" name="amount" id="amount" placeholder="amount" pattern="^[ 0-9]+$" required title="only numbers please" />
             </div>
             <br>
             <div class="form-group-lg input-group">
-                <span class="input-group-addon" id="addon-message"><i class="glyphicon glyphicon-paperclip"></i></span>
-                <input type="text" autocomplete="off" class="form-control" name="message" aria-describedby="addon-message" placeholder="text message" id="message" />
+                <span class="input-group-addon" id="addon-message"><i class="glyphicon glyphicon-pencil"></i></span>
+                <input type="text" autocomplete="off" class="form-control" name="message" aria-describedby="addon-message" placeholder="message" id="message" />
             </div>
             <br>
 
