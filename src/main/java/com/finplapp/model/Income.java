@@ -1,16 +1,15 @@
 package com.finplapp.model;
 
-
 import javax.persistence.*;
 
 @Entity
-@Table(name = "incomes")
-public class Income extends Event{
+public class Income extends Ledger {
 
-   @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "incomeType_id")
     private IncomeType incomeType;
 
-    public Income(){
+    public Income() {
 
     }
 

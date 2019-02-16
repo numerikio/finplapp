@@ -84,10 +84,9 @@ public class PeriodOfTime implements Comparable<PeriodOfTime> {
         this.balance = balance;
     }
 
-
     @Override
     public int compareTo(PeriodOfTime o) {
-        return Comparator.comparing(PeriodOfTime::getLocalDate).compare(this,o);
+        return Comparator.comparing(PeriodOfTime::getLocalDate).compare(this, o);
 
     }
 }

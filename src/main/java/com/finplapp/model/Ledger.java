@@ -3,8 +3,8 @@ package com.finplapp.model;
 import javax.persistence.*;
 
 @MappedSuperclass
-public abstract class Event {
-
+public abstract class Ledger {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

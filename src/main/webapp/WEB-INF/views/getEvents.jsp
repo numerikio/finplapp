@@ -27,11 +27,11 @@
    <br>
 
     <div class="container">
-        <form action="getAllEventOfDate">
+        <form class="form-inline" action="getAllEventOfDate">
             <h2>View events</h2>
 
             <%@include file="calendarWithPeriod.jsp" %>
-            <br>
+
             <button type="submit" class="btn-lg btn-primary"><i class="glyphicon glyphicon-search"></i></button>
 
         </form>

@@ -46,8 +46,8 @@ public class PersistentTokenRepositoryImpl implements PersistentTokenRepository 
     @Override
     public void removeUserTokens(String username) {
         List<PersistentLogin> existingToken = tokenRepository.findByUsername(username);
-        if(existingToken.size() > 0){
-            for (int i=0; i<existingToken.size(); i++){
+        if (existingToken.size() > 0) {
+            for (int i = 0; i < existingToken.size(); i++) {
                 tokenRepository.delete(existingToken.get(i));
             }
         }

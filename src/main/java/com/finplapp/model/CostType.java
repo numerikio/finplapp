@@ -1,16 +1,8 @@
 package com.finplapp.model;
 
-public enum CostType {
-    RENT,
-    FOOD,
-    CLOTHES,
-    TRANSPORT,
-    HOBBY,
-    HOLIDAY,
-    SOMETHING_OTHER;
+import javax.persistence.Entity;
 
-    @Override
-    public String toString() {
-        return this.name();
-    }
+@Entity
+public class CostType extends LedgerEntryType {
+
 }

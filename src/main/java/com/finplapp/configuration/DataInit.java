@@ -1,10 +1,9 @@
 package com.finplapp.configuration;
 
-import com.finplapp.model.UserProfile;
-import com.finplapp.model.User;
-import com.finplapp.model.UserProfileType;
-import com.finplapp.service.UserProfileService;
-import com.finplapp.service.UserService;
+import com.finplapp.model.*;
+import com.finplapp.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
@@ -16,8 +15,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-@PropertySource("classpath:login_data.properties")
+@PropertySource({
+        "classpath:login_data.properties",
+        "classpath:default_types.properties"
+})
 public class DataInit {
+
+    static final Logger logger = LoggerFactory.getLogger(DataInit.class);
 
     @Autowired
     private UserProfileService userProfileService;
@@ -29,16 +33,23 @@ public class DataInit {
     @Qualifier("userService")
     private UserService userService;
 
-    UserProfileType[] userProfileTypes = UserProfileType.values();
+    @Autowired
+    private CostTypeService costTypeService;
+
+    @Autowired
+    private IncomeTypeService incomeTypeService;
+
+    private UserProfileType[] userProfileTypes = UserProfileType.values();
 
     @PostConstruct
     private void init() {
-        addDataToDB();
+        addProfileTypesDataToDB();
         addAdminDataToDB();
+        addLedgerTipesToDB(costTypeService, new CostType(), "default.cost.type");
+        addLedgerTipesToDB(incomeTypeService, new IncomeType(),"default.income.type");
     }
 
-
-    private void addDataToDB() {
+    private void addProfileTypesDataToDB() {
         for (UserProfileType uP : userProfileTypes) {
             if (userProfileService.findByType(uP.getUserProfileType()) == null) {
                 UserProfile userProfile = new UserProfile();
@@ -46,6 +57,27 @@ public class DataInit {
                 userProfileService.saveUserProfile(userProfile);
             }
         }
+    }
+
+    private void addLedgerTipesToDB(LedgerTypeService ledgerTypeService, LedgerEntryType ledgerEntryType, String sourceDefaultTypes) {
+        for (String s : getArrayOfProperties(environment.getProperty(sourceDefaultTypes))
+        ) {
+            if (ledgerTypeService.findByType(s) == null) {
+                try {
+                    Class c = Class.forName(ledgerEntryType.getClass().getName());
+                    LedgerEntryType newledgerEntryType = (LedgerEntryType) c.newInstance();
+                    newledgerEntryType.setType(s);
+                    ledgerTypeService.saveType(newledgerEntryType);
+                } catch (Exception e) {
+                    logger.error(e.getLocalizedMessage());
+                }
+            }
+        }
+    }
+
+    private String[] getArrayOfProperties(String s) {
+        String regex = ",";
+        return s.split(regex);
     }
 
     private void addAdminDataToDB() {
@@ -56,10 +88,6 @@ public class DataInit {
             user.setPassword(environment.getProperty("data.admin.password"));
 
             Set<UserProfile> userProfiles = new HashSet<>();
-
-            // for (UserProfileType uP : userProfileTypes) {
-            // userProfileService.saveUserProfile(userProfile);
-
             userProfiles.add(userProfileService.findByType("ADMIN"));
             userProfiles.add(userProfileService.findByType("ANALYST"));
             userProfiles.add(userProfileService.findByType("USER"));

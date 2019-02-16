@@ -10,10 +10,16 @@ import java.util.List;
 public interface PeriodOfTimeService {
 
     void savePeriodOfTime(PeriodOfTime periodOfTime);
+
     void updatePeriodOfTime(PeriodOfTime periodOfTime);
-    PeriodOfTime findByLocalDateAndUser (LocalDate localDate, User user);
-    List<PeriodOfTime>findByUser(User user);
-    List<PeriodOfTime>findEmptiesPeriods(User user);
+
+    PeriodOfTime findByLocalDateAndUser(LocalDate localDate, User user);
+
+    List<PeriodOfTime> findByUser(User user);
+
+    List<PeriodOfTime> findEmptiesPeriods(User user);
+
     void deletePeriodOfTime(PeriodOfTime periodOfTime);
+
     PeriodOfTime findById(Long id);
 }

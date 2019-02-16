@@ -6,6 +6,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 import java.io.Serializable;
 
 @NoRepositoryBean
-public interface EventRepository<T, ID extends Serializable> extends JpaRepository<T, ID> {
+public interface LedgerRepository<T, ID extends Serializable> extends JpaRepository<T, ID> {
 
 }

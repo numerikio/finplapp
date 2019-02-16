@@ -31,14 +31,14 @@
                 <select name="costTypes" id="costTypes" class="form-control" aria-describedby="addon-type">
                     <option value="SOMETHING_OTHER"></option>
                     <c:forEach items="${costTypes}" var="value">
-                        <option>${value}</option>
+                        <option>${value.type}</option>
                     </c:forEach>
                 </select>
             </div>
             <br>
             <div class="form-group-lg input-group">
-                <span class="input-group-addon" id="addon-amaunt"><i class="glyphicon glyphicon-usd"></i></span>
-                <input type="number" autocomplete="off" class="form-control" aria-describedby="addon-amaunt" name="amount" id="amount" placeholder="amount" pattern="^[ 0-9]+$" required title="only numbers please" />
+                <span class="input-group-addon" id="addon-amount"><i class="glyphicon glyphicon-usd"></i></span>
+                <input type="number" autocomplete="off" class="form-control" aria-describedby="addon-amount" name="amount" id="amount" placeholder="amount" pattern="^[ 0-9]+$" required title="only numbers please" />
             </div>
             <br>
             <div class="form-group-lg input-group">

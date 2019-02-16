@@ -9,28 +9,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-
 @Service("userProfileService")
 @Transactional
-public class UserProfileServiceImpl implements UserProfileService{
-	
-	@Autowired
-	private UserProfileRepository repository;
-	
-	public UserProfile findById(int id) {
-		return repository.findOne(id);
-	}
+public class UserProfileServiceImpl implements UserProfileService {
 
-	public UserProfile findByType(String type){
-		return repository.findByType(type);
-	}
+    @Autowired
+    private UserProfileRepository repository;
 
-	public List<UserProfile> findAll() {
-		return repository.findAll();
-	}
+    public UserProfile findById(int id) {
+        return repository.findOne(id);
+    }
 
-	@Override
-	public void saveUserProfile(UserProfile userProfile) {
-		repository.save(userProfile);
-	}
+    public UserProfile findByType(String type) {
+        return repository.findByType(type);
+    }
+
+    public List<UserProfile> findAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public void saveUserProfile(UserProfile userProfile) {
+        repository.save(userProfile);
+    }
 }

@@ -22,7 +22,7 @@ public class PeriodOfTimeServiceImpl implements PeriodOfTimeService {
 
     @Override
     public void updatePeriodOfTime(PeriodOfTime periodOfTime) {
-PeriodOfTime entity = periodOfTimeRepository.findOne(periodOfTime.getId());
+        PeriodOfTime entity = periodOfTimeRepository.findOne(periodOfTime.getId());
         if (entity != null) {
             entity.setBalance(periodOfTime.getBalance());
             entity.setLocalDate(periodOfTime.getLocalDate());
@@ -32,7 +32,7 @@ PeriodOfTime entity = periodOfTimeRepository.findOne(periodOfTime.getId());
 
     @Override
     public PeriodOfTime findByLocalDateAndUser(LocalDate localDate, User user) {
-        return periodOfTimeRepository.findByLocalDateAndUser(localDate,user);
+        return periodOfTimeRepository.findByLocalDateAndUser(localDate, user);
     }
 
     @Override

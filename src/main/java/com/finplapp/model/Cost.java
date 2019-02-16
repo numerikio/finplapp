@@ -1,28 +1,25 @@
 package com.finplapp.model;
 
-
 import javax.persistence.*;
 
-
 @Entity
-@Table(name = "costs")
-public class Cost extends Event{
+public class Cost extends Ledger {
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "costType_id")
     private CostType costType;
 
     public Cost() {
 
     }
 
-    public CostType getTypeCost() {
+    public CostType getCostType() {
         return costType;
     }
 
-    public void setTypeCost(CostType costType) {
+    public void setCostType(CostType costType) {
         this.costType = costType;
     }
-
 }
 
 

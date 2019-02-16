@@ -1,35 +1,31 @@
 package com.finplapp.service;
 
 import com.finplapp.model.Cost;
-import com.finplapp.repository.CostRepository;
-import com.finplapp.repository.EventRepository;
+import com.finplapp.repository.LedgerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("costService")
 public class CostServiceImpl implements CostService {
 
-    /*@Autowired
-    CostRepository costRepository;*/
-
     @Autowired
-    EventRepository<Cost,Long> eventRepository;
+    LedgerRepository<Cost,Long> ledgerRepository;
 
     @Override
     public void saveCost(Cost cost) {
-        eventRepository.save(cost);
+        ledgerRepository.save(cost);
     }
 
     @Override
     public Cost findCostById(Long id) {
-        return eventRepository.getOne(id);
+        return ledgerRepository.getOne(id);
     }
 
     @Override
     public void updateCost(Cost cost) {
-        Cost entity = eventRepository.findOne(cost.getId());
+        Cost entity = ledgerRepository.findOne(cost.getId());
         if (entity != null) {
-            entity.setTypeCost(cost.getTypeCost());
+            entity.setCostType(cost.getCostType());
             entity.setAmount(cost.getAmount());
             entity.setMessage(cost.getMessage());
         }
@@ -37,7 +33,7 @@ public class CostServiceImpl implements CostService {
 
     @Override
     public void deleteCost(Long id) {
-        eventRepository.delete(id);
+        ledgerRepository.delete(id);
     }
 }
 

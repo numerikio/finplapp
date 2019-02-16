@@ -19,11 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +32,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 
 @Controller
@@ -46,6 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class AppController {
 
     static final Logger logger = LoggerFactory.getLogger(AppController.class);
+
     @Autowired
     @Qualifier("userService")
     private UserService userService;
@@ -76,6 +72,11 @@ public class AppController {
     @Qualifier("incomeService")
     private IncomeService incomeService;
 
+    @Autowired
+    private CostTypeService costTypeService;
+
+    @Autowired
+    private IncomeTypeService incomeTypeService;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String mainPage(ModelMap model) throws IOException {
@@ -124,7 +125,7 @@ public class AppController {
 
     @RequestMapping(value = {"Cost"}, method = RequestMethod.GET)
     public String pageCost(ModelMap model) {
-        model.addAttribute("costTypes", CostType.values());
+        model.addAttribute("costTypes", costTypeService.findAll());
         return "costPage";
     }
 
@@ -137,7 +138,7 @@ public class AppController {
         Cost cost = new Cost();
         cost.setAmount(Double.valueOf(amount));
         cost.setMessage(message);
-        cost.setTypeCost(CostType.valueOf(costTypes));
+        cost.setCostType(costTypeService.findByType(costTypes));
 
         User user = userService.findBySSO(getPrincipal());
         PeriodOfTime periodOfTime = getNewOrOldPeriodOfTime(getLocalDateWithString(date), user);
@@ -168,7 +169,7 @@ public class AppController {
 
     @RequestMapping(value = {"Income"}, method = RequestMethod.GET)
     public String pageIncome(ModelMap model) {
-        model.addAttribute("incomeTypes", IncomeType.values());
+        model.addAttribute("incomeTypes", incomeTypeService.findAll());
         return "incomePage";
     }
 
@@ -181,7 +182,7 @@ public class AppController {
         Income income = new Income();
         income.setAmount(Double.valueOf(amount));
         income.setMessage(message);
-        income.setTypeIncome(IncomeType.valueOf(incomeTypes));
+        income.setTypeIncome(incomeTypeService.findByType(incomeTypes));
 
         User user = userService.findBySSO(getPrincipal());
         PeriodOfTime periodOfTime = getNewOrOldPeriodOfTime(getLocalDateWithString(date), user);
@@ -229,7 +230,6 @@ public class AppController {
     public String saveUser(@Valid User user, BindingResult result, ModelMap model) {
         System.out.println(user.getSsoId());
         if (result.hasErrors()) {
-
             logger.info(result.toString());
             return "registration";
         }
@@ -339,7 +339,6 @@ public class AppController {
     private String getPrincipal() {
         String userName = null;
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         if (principal instanceof UserDetails) {
             userName = ((UserDetails) principal).getUsername();
         } else {
@@ -386,11 +385,11 @@ public class AppController {
         return periodOfTimes;
     }
 
-    private Double getSumEventsOfPeridofTime(List<? extends Event> eventList) {
+    private Double getSumEventsOfPeridofTime(List<? extends Ledger> ledgersList) {
         Double sum = 0.0;
-        for (Event event : eventList
+        for (Ledger ledger : ledgersList
         ) {
-            sum += event.getAmount();
+            sum += ledger.getAmount();
         }
         return sum;
     }

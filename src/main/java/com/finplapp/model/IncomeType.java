@@ -1,6 +1,8 @@
 package com.finplapp.model;
 
-public enum IncomeType {
-    SALARY,
-    SOMETHING_OTHER
+import javax.persistence.Entity;
+
+@Entity
+public class IncomeType extends LedgerEntryType {
+
 }
