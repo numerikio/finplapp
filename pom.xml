@@ -15,9 +15,19 @@
 		<spring.version>4.3.8.RELEASE</spring.version>
 		<springsecurity.version>4.0.4.RELEASE</springsecurity.version>
 		<hibernate.version>4.3.11.Final</hibernate.version>
+		<hibernate.validator>5.1.3.Final</hibernate.validator>
 		<h2.connector.version>1.4.197</h2.connector.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<mysql.version>8.0.14</mysql.version>
+		<validation.api>1.1.0.Final</validation.api>
+		<javax.servlet>3.1.0</javax.servlet>
+		<javax.servlet.jsp>2.3.1</javax.servlet.jsp>
+		<javax.servlet.jstl>1.2</javax.servlet.jstl>
+		<jackson.core>2.9.4</jackson.core>
+		<spring.data.jpa>1.9.1.RELEASE</spring.data.jpa>
+		<hibernate.jpa>1.0.0.Final</hibernate.jpa>
+		<maven.compiler.plugin>3.8.0</maven.compiler.plugin>
+		<maven.war.plugin>3.2.2</maven.war.plugin>
 	</properties>
 
 	<dependencies>
@@ -88,12 +98,12 @@
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
-			<version>1.1.0.Final</version>
+			<version>${validation.api}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<version>5.1.3.Final</version>
+			<version>${hibernate.validator}</version>
 		</dependency>
 
 		<!-- slf4j/slf4j-log4j12-->
@@ -114,17 +124,17 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
+			<version>${javax.servlet}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet.jsp</groupId>
 			<artifactId>javax.servlet.jsp-api</artifactId>
-			<version>2.3.1</version>
+			<version>${javax.servlet.jsp}</version>
 		</dependency>
 		<dependency>
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>jstl</artifactId>
-		    <version>1.2</version>
+		    <version>${javax.servlet.jstl}</version>
 		</dependency>
 
 		<!-- jackson -->
@@ -132,7 +142,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.4</version>
+			<version>${jackson.core}</version>
 		</dependency>
 
 
@@ -141,13 +151,13 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
-			<version>1.9.1.RELEASE</version>
+			<version>${spring.data.jpa}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.hibernate.javax.persistence</groupId>
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
-			<version>1.0.0.Final</version>
+			<version>${hibernate.jpa}</version>
 		</dependency>
 
 	</dependencies>
@@ -200,7 +210,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>${maven.compiler.plugin}</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
@@ -210,7 +220,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.2.2</version>
+				<version>${maven.war.plugin}</version>
 				<configuration>
 					<webappDirectory>C:\Program Files\apache-tomcat-8.5.37\webapps\fpapp</webappDirectory>
 				</configuration>
