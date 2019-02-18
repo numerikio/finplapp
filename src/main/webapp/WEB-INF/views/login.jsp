@@ -47,14 +47,26 @@
                         </div>
 
                         <div class="col-md-1 col-md-offset-8 col-lg-1 col-lg-offset-8 col-sm-1 col-sm-offset-8 col-xs-1 col-xs-offset-8">
-                            <a href="/newuser" class="btn-lg btn-primary pull-right">registration</a>
+                            <a href="newuser" class="btn-lg btn-primary pull-right">registration</a>
                         </div>
                     </div>
 
                 </form>
+
             </div>
 
         </div>
+        <br>
+            <br>
 
+            <div class="container">
+                <pre>ADMIN<br>
+                login : admin<br>
+                pass  : admin</pre>
+
+                <pre>ANALYST<br>
+                login : analyst<br>
+                pass  : analyst</pre>
+            </div>
     </body>
 </html>

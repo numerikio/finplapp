@@ -44,9 +44,11 @@ public class DataInit {
     @PostConstruct
     private void init() {
         addProfileTypesDataToDB();
+        addSuperUserDataToDB();
         addAdminDataToDB();
+        addAnalystDataToDB();
         addLedgerTipesToDB(costTypeService, new CostType(), "default.cost.type");
-        addLedgerTipesToDB(incomeTypeService, new IncomeType(),"default.income.type");
+        addLedgerTipesToDB(incomeTypeService, new IncomeType(), "default.income.type");
     }
 
     private void addProfileTypesDataToDB() {
@@ -80,6 +82,22 @@ public class DataInit {
         return s.split(regex);
     }
 
+    private void addSuperUserDataToDB() {
+        if (userService.findBySSO(environment.getProperty("data.s.admin.sso_id")) == null) {
+            User user = new User();
+            user.setSsoId(environment.getProperty("data.s.admin.sso_id"));
+            user.setEmail(environment.getProperty("data.s.admin.email"));
+            user.setPassword(environment.getProperty("data.s.admin.password"));
+
+            Set<UserProfile> userProfiles = new HashSet<>();
+            userProfiles.add(userProfileService.findByType("ADMIN"));
+            userProfiles.add(userProfileService.findByType("ANALYST"));
+            userProfiles.add(userProfileService.findByType("USER"));
+            user.setUserProfiles(userProfiles);
+            userService.saveUser(user);
+        }
+    }
+
     private void addAdminDataToDB() {
         if (userService.findBySSO(environment.getProperty("data.admin.sso_id")) == null) {
             User user = new User();
@@ -89,8 +107,20 @@ public class DataInit {
 
             Set<UserProfile> userProfiles = new HashSet<>();
             userProfiles.add(userProfileService.findByType("ADMIN"));
+            user.setUserProfiles(userProfiles);
+            userService.saveUser(user);
+        }
+    }
+
+    private void addAnalystDataToDB() {
+        if (userService.findBySSO(environment.getProperty("data.analyst.sso_id")) == null) {
+            User user = new User();
+            user.setSsoId(environment.getProperty("data.analyst.sso_id"));
+            user.setEmail(environment.getProperty("data.analyst.email"));
+            user.setPassword(environment.getProperty("data.analyst.password"));
+
+            Set<UserProfile> userProfiles = new HashSet<>();
             userProfiles.add(userProfileService.findByType("ANALYST"));
-            userProfiles.add(userProfileService.findByType("USER"));
             user.setUserProfiles(userProfiles);
             userService.saveUser(user);
         }

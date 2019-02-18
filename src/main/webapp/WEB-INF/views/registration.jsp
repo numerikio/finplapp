@@ -2,6 +2,7 @@
 <%@ page isELIgnored="false" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 
 <html>
 
@@ -81,21 +82,29 @@
 				</div>
 			</div>
 
-		    <%--div class="row">
+<sec:authorize access="hasRole('ADMIN')">
+		    <div class="row">
 				<div class="form-group col-md-12">
 					<label class="col-md-3 control-lable" for="userProfiles">Roles</label>
 					<div class="col-md-7">
-					<c:choose>
+					<%--c:choose>
 					   <c:when test="${edit}">
-						<form:select path="userProfiles" items="${roles}" multiple="true" itemValue="id" itemLabel="type" class="form-control input-sm" />
+						<form:select path="userProfiles" items="${roles}" itemValue="id" itemLabel="type" class="form-control input-sm" />
 						<div class="has-error">
 							<form:errors path="userProfiles" class="help-inline"/>
 						</div>
 					   </c:when>
-					</c:choose>
+					</c:choose--%>
+					<select path="userProfiles" id="userProfiles">
+
+                                        <c:forEach items="${roles}" var="value">
+                                            <option>${value.type}</option>
+                                        </c:forEach>
+                                    </select>
 					</div>
 				</div>
-			</div--%>
+			</div>
+ </sec:authorize>
 
 			<div class="row">
 				<div class="form-actions floatRight">

@@ -17,7 +17,7 @@ public class UserProfile implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "TYPE", length = 15, unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String type;
 
     public Integer getId() {

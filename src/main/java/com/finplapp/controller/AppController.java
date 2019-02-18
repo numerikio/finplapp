@@ -7,12 +7,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.finplapp.DateMeasure;
 import com.finplapp.model.*;
 import com.finplapp.service.*;
 import org.slf4j.Logger;
@@ -80,6 +80,28 @@ public class AppController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String mainPage(ModelMap model) throws IOException {
+        ArrayList<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
+        updateDatasOfPeriod(periodOfTimes);
+
+        ArrayList<ArrayList> arrayLists = new ArrayList<>();
+        arrayLists.add(getBalanceListAllPeriods(periodOfTimes));
+
+        DataForChart dataForChart = new DataForChart(getTimeStepAllPeriodForGraf(periodOfTimes), arrayLists);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jString = objectMapper.writeValueAsString(dataForChart);
+
+        model.addAttribute("dateMeasure", DateMeasure.values());
+        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("data", jString);
+        return "mainPage";
+    }
+
+    @RequestMapping(value = "/mainRedact", method = RequestMethod.GET)
+    public String mainPage(@RequestParam("date") String date,
+                           @RequestParam("costTypes") String costTypes,
+                           @RequestParam("amount") String amount,
+                           @RequestParam("message") String message,
+                           ModelMap model) throws IOException {
         ArrayList<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
         updateDatasOfPeriod(periodOfTimes);
 
@@ -271,12 +293,10 @@ public class AppController {
         if (result.hasErrors()) {
             return "registration";
         }
-
         userService.updateUser(user);
         model.addAttribute("loggedinuser", getPrincipal());
         return "registrationsuccess";
     }
-
 
     /**
      * This method will delete an user by it's SSOID value.

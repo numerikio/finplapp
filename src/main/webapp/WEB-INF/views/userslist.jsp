@@ -15,7 +15,16 @@
 <body>
 	<div class="generic-container">
 		<div class="panel panel-default">
-			  <!-- Default panel contents -->
+		<sec:authorize access="hasRole('ADMIN')">
+        		 	<div class="well">
+        		 		<a href="<c:url value='/logout' />" class="btn btn-warning custom-width">logout</a>
+        		 	</div>
+        	 	</sec:authorize>
+        	 	<sec:authorize access="hasRole('ADMIN')">
+                		 	<div class="well">
+                		 		<a href="<c:url value='/newuser' />" class="btn btn-warning custom-width">new user</a>
+                		 	</div>
+                	 	</sec:authorize>
 		  	<div class="panel-heading"><span class="lead">List of Users </span></div>
 			<table class="table table-hover">
 	    		<thead>
@@ -43,11 +52,8 @@
 	    		</tbody>
 	    	</table>
 		</div>
-		<sec:authorize access="hasRole('ADMIN')">
-		 	<div class="well">
-		 		<a href="<c:url value='/logout' />" class="btn btn-warning custom-width">logout</a>
-		 	</div>
-	 	</sec:authorize>
+
+
    	</div>
 </body>
 </html>
