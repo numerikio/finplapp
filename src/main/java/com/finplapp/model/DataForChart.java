@@ -1,31 +1,32 @@
 package com.finplapp.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DataForChart {
 
-    private ArrayList<String> labels;
+    private List<String> labels;
 
-    private ArrayList<ArrayList> series;
+    private List<List> series;
 
-    public DataForChart(ArrayList<String> labels, ArrayList<ArrayList> series) {
+    public DataForChart(List<String> labels, List<List> series) {
         this.labels = labels;
         this.series = series;
     }
 
-    public ArrayList<String> getLabels() {
+    public List<String> getLabels() {
         return labels;
     }
 
-    public void setLabels(ArrayList<String> labels) {
+    public void setLabels(List<String> labels) {
         this.labels = labels;
     }
 
-    public ArrayList<ArrayList> getSeries() {
+    public List<List> getSeries() {
         return series;
     }
 
-    public void setSeries(ArrayList<ArrayList> series) {
+    public void setSeries(List<List> series) {
         this.series = series;
     }
 }

@@ -13,6 +13,7 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.finplapp.DateMeasure;
+import com.finplapp.DatesException;
 import com.finplapp.model.*;
 import com.finplapp.service.*;
 import org.slf4j.Logger;
@@ -20,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -78,18 +81,26 @@ public class AppController {
     @Autowired
     private IncomeTypeService incomeTypeService;
 
+    private final String defaultDateMeaserePast = "WEEK";
+    private final String defaultDateMeasereFuture = "MONTH";
+    private final long defaultDateQuantityPast = 1L;
+    private final long defaultDateQuantityFuture = 9L;
+
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String mainPage(ModelMap model) throws IOException {
-        ArrayList<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
+
+        List<LocalDate> targetLocalDates = getAllDatesOfPeriod(
+                getLocalDateByDateMeasure(DateMeasure.valueOf(defaultDateMeaserePast), -(defaultDateQuantityPast)),
+                getLocalDateByDateMeasure(DateMeasure.valueOf(defaultDateMeasereFuture), defaultDateQuantityFuture));
+        List<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
         updateDatasOfPeriod(periodOfTimes);
+        periodOfTimes = getLimitedListPeriodOfTime(periodOfTimes, targetLocalDates);
 
-        ArrayList<ArrayList> arrayLists = new ArrayList<>();
-        arrayLists.add(getBalanceListAllPeriods(periodOfTimes));
-
-        DataForChart dataForChart = new DataForChart(getTimeStepAllPeriodForGraf(periodOfTimes), arrayLists);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jString = objectMapper.writeValueAsString(dataForChart);
-
+        List<List> lists = new ArrayList<>();
+        lists.add(getBalanceListAllPeriods(periodOfTimes));
+        String jString = new ObjectMapper().writeValueAsString
+                (new DataForChart(getTimeStepAllPeriodForGraf(periodOfTimes), lists));
+        model.addAttribute("dateNow", getLabelNowForGraf());
         model.addAttribute("dateMeasure", DateMeasure.values());
         model.addAttribute("loggedinuser", getPrincipal());
         model.addAttribute("data", jString);
@@ -97,21 +108,38 @@ public class AppController {
     }
 
     @RequestMapping(value = "/mainRedact", method = RequestMethod.GET)
-    public String mainPage(@RequestParam("date") String date,
-                           @RequestParam("costTypes") String costTypes,
-                           @RequestParam("amount") String amount,
-                           @RequestParam("message") String message,
+    public String mainPage(@RequestParam("measureTypeP") String measureTypeP,
+                           @RequestParam("beforeNow") Long beforeNow,
+                           @RequestParam("afterNow") Long afterNow,
+                           @RequestParam("measureTypeF") String measureTypeF,
                            ModelMap model) throws IOException {
-        ArrayList<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
+
+        if (measureTypeP == null || beforeNow == null) {
+            measureTypeP = defaultDateMeaserePast;
+            beforeNow = defaultDateQuantityPast;
+        }
+        if (measureTypeF == null || afterNow == null) {
+            measureTypeF = defaultDateMeasereFuture;
+            afterNow = defaultDateQuantityFuture;
+        }
+        List<LocalDate> targetLocalDates = getAllDatesOfPeriod(getLocalDateByDateMeasure(DateMeasure.valueOf(measureTypeP), -(beforeNow)),
+                getLocalDateByDateMeasure(DateMeasure.valueOf(measureTypeF), afterNow));
+        List<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
         updateDatasOfPeriod(periodOfTimes);
+        periodOfTimes = getLimitedListPeriodOfTime(periodOfTimes, targetLocalDates);
 
-        ArrayList<ArrayList> arrayLists = new ArrayList<>();
-        arrayLists.add(getBalanceListAllPeriods(periodOfTimes));
+        List<List> lists = new ArrayList<>();
+        lists.add(getBalanceListAllPeriods(periodOfTimes));
 
-        DataForChart dataForChart = new DataForChart(getTimeStepAllPeriodForGraf(periodOfTimes), arrayLists);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jString = objectMapper.writeValueAsString(dataForChart);
+        String jString = new ObjectMapper().writeValueAsString
+                (new DataForChart(getTimeStepAllPeriodForGraf(periodOfTimes), lists));
 
+        model.addAttribute("beforeNow", beforeNow);
+        model.addAttribute("afterNow", afterNow);
+        model.addAttribute("measureTypeP", DateMeasure.valueOf(measureTypeP));
+        model.addAttribute("measureTypeF", DateMeasure.valueOf(measureTypeF));
+        model.addAttribute("dateNow", getLabelNowForGraf());
+        model.addAttribute("dateMeasure", DateMeasure.values());
         model.addAttribute("loggedinuser", getPrincipal());
         model.addAttribute("data", jString);
         return "mainPage";
@@ -387,7 +415,7 @@ public class AppController {
         }
     }
 
-    private void updateDatasOfPeriod(ArrayList<PeriodOfTime> periodOfTimes) {
+    private void updateDatasOfPeriod(List<PeriodOfTime> periodOfTimes) {
         for (int i = 0; i < periodOfTimes.size(); i++) {
             Double calculationOfPeriod = getSumEventsOfPeridofTime(periodOfTimes.get(i).getIncomeList()) - getSumEventsOfPeridofTime(periodOfTimes.get(i).getCostList());
             if (i != 0) {
@@ -399,8 +427,8 @@ public class AppController {
         }
     }
 
-    private ArrayList<PeriodOfTime> getSortedPeriodOfTimeList() {
-        ArrayList<PeriodOfTime> periodOfTimes = (ArrayList<PeriodOfTime>) periodOfTimeService.findByUser(userService.findBySSO(getPrincipal()));
+    private List<PeriodOfTime> getSortedPeriodOfTimeList() {
+        List<PeriodOfTime> periodOfTimes = (List<PeriodOfTime>) periodOfTimeService.findByUser(userService.findBySSO(getPrincipal()));
         periodOfTimes.sort((o1, o2) -> o1.compareTo(o2));
         return periodOfTimes;
     }
@@ -414,8 +442,8 @@ public class AppController {
         return sum;
     }
 
-    private ArrayList<Double> getBalanceListAllPeriods(ArrayList<PeriodOfTime> periodOfTimes) {
-        ArrayList<Double> balanseList = new ArrayList<>();
+    private List<Double> getBalanceListAllPeriods(List<PeriodOfTime> periodOfTimes) {
+        List<Double> balanseList = new ArrayList<>();
         for (PeriodOfTime periodOfTime : periodOfTimes
         ) {
             balanseList.add(periodOfTime.getBalance());
@@ -423,14 +451,19 @@ public class AppController {
         return balanseList;
     }
 
-    private ArrayList<String> getTimeStepAllPeriodForGraf(ArrayList<PeriodOfTime> periodOfTimes) {
-        ArrayList<String> timeSteps = new ArrayList<>();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM");
+    private List<String> getTimeStepAllPeriodForGraf(List<PeriodOfTime> periodOfTimes) {
+        List<String> timeSteps = new ArrayList<>();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy");
         for (PeriodOfTime periodOfTime : periodOfTimes
         ) {
             timeSteps.add(periodOfTime.getLocalDate().format(dateTimeFormatter));
         }
         return timeSteps;
+    }
+
+    private String getLabelNowForGraf() {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy");
+        return LocalDate.now().format(dateTimeFormatter);
     }
 
 
@@ -479,5 +512,44 @@ public class AppController {
         ) {
             periodOfTimeService.deletePeriodOfTime(period);
         }
+    }
+
+    private LocalDate getLocalDateByDateMeasure(DateMeasure dateMeasure, long quantity) {
+        LocalDate localDate = LocalDate.now();
+        switch (dateMeasure) {
+            case DAY:
+                return localDate.plusDays(quantity);
+            case WEEK:
+                return localDate.plusWeeks(quantity);
+            case MONTH:
+                return localDate.plusMonths(quantity);
+            case YEAR:
+                return localDate.plusYears(quantity);
+            default:
+                return null;
+        }
+    }
+
+    private List<LocalDate> getAllDatesOfPeriod(LocalDate dayBefore, LocalDate dayAfter) {
+        ArrayList<LocalDate> localDates = new ArrayList<>();
+        LocalDate theDayNow = LocalDate.now();
+        long day1 = ChronoUnit.DAYS.between(theDayNow, dayBefore);
+        long day2 = ChronoUnit.DAYS.between(theDayNow, dayAfter);
+        long oneDeyForCorrectWork = 1L;
+        for (long i = day1; i < day2 + oneDeyForCorrectWork; i++) {
+            localDates.add(theDayNow.plusDays(i));
+        }
+        return localDates;
+    }
+
+    private List<PeriodOfTime> getLimitedListPeriodOfTime(List<PeriodOfTime> periodOfTimes, List<LocalDate> localDates) {
+        List<PeriodOfTime> periods = new ArrayList<>();
+        for (PeriodOfTime period : periodOfTimes
+        ) {
+            if (localDates.contains(period.getLocalDate())) {
+                periods.add(period);
+            }
+        }
+        return periods;
     }
 }

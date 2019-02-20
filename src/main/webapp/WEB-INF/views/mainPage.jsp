@@ -21,8 +21,8 @@
             <div class="container-fluid">
 
                 <div class="btn-group-lg btn-group-justified">
-                    <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus-sign"></i></a>
-                    <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus-sign"></i></a>
+                    <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus"></i><i class="glyphicon glyphicon-usd"></i></a>
+                    <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i><i class="glyphicon glyphicon-usd"></i></a>
                     <a href="getEvents" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></a>
                     <a href="logout" class="btn btn-primary">${loggedinuser} <i class="glyphicon glyphicon-log-out"></i></a>
                 </div>
@@ -32,50 +32,55 @@
         <br>
         <br>
         <br>
-        <!--div class="container">
-            <form class="form-inline" action="saveCost">
-                <div class="form-group">
-                    <div class="form-group-lg input-group">
-                        <span class="input-group-addon" id="addon-type"><i class="glyphicon glyphicon-arrow-left"></i></span>
-                        <select name="costTypes" id="costTypes" class="form-control" aria-describedby="addon-type">
-                            <option selected value="DAY"></option>
-                            <c:forEach items="${dateMeasure}" var="value">
-                                <option>${value}</option>
-                            </c:forEach>
-                        </select>
+
+        <div class="container">
+            <form action="mainRedact">
+                <div class="row row-centered">
+                    <div class="col-sm-6 col-md-2">
+                        <div class="form-group-lg input-group">
+                            <span class="input-group-addon" id="addon-type"><i class="glyphicon glyphicon-arrow-left"></i></span>
+                            <select name="measureTypeP" id="measureTypeP" class="form-control" aria-describedby="addon-type">
+                                <option>${measureTypeP}</option>
+                                <c:forEach items="${dateMeasure}" var="value">
+                                    <c:if test="${value ne measureTypeP}">
+                                        <option>${value}</option>
+                                    </c:if>
+
+                                </c:forEach>
+                            </select>
+                        </div>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="form-group-lg input-group">
-                        <input type="number" max="0" step="1" autocomplete="off" class="form-control" name="beforeNow" id="beforeNow" placeholder="before now" />
+                    <div class="col-sm-6 col-md-2">
+                        <div class="form-group-lg input-group-fluid">
+                            <input type="number" min=0 step=1 value=${beforeNow} autocomplete="off" class="form-control" name="beforeNow" id="beforeNow" placeholder="before now" />
+                        </div>
                     </div>
-
-                </div>
-
-                <button type="submit" class="btn-lg btn-primary"><i class="glyphicon glyphicon-eye-open"></i></button>
-
-                <div class="form-group">
-                    <div class="form-group-lg input-group">
-                        <input type="number" autocomplete="off" class="form-control" name="afterNow" id="afterNow" placeholder="after now" step="1" pattern="\d+" required title="only numbers please" />
+                    <div class="col-sm-2 col-sm-offset-5 col-md-1 col-md-offset-0">
+                        <button type="submit" class="btn-lg btn-primary btn-block"><i class="glyphicon glyphicon-sunglasses"></i></button>
                     </div>
-
-                </div>
-
-                <div class="form-group">
-                    <div class="form-group-lg input-group">
-                        <select name="costTypes" id="costTypes" class="form-control" aria-describedby="addon-type">
-                            <option value="DAY"></option>
-                            <c:forEach items="${dateMeasure}" var="value">
-                                <option>${value}</option>
-                            </c:forEach>
-                        </select>
-                        <span class="input-group-addon" id="addon-type"><i class="glyphicon glyphicon-arrow-right"></i></span>
+                    <div class="col-sm-6 col-md-2">
+                        <div class="form-group-lg input-group-fluid">
+                            <input type="number" min=0 step=1 value=${afterNow} autocomplete="off" class="form-control" name="afterNow" id="afterNow" placeholder="after now" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-2">
+                        <div class="form-group-lg input-group">
+                            <select name="measureTypeF" id="measureTypeF" class="form-control" aria-describedby="addon-type">
+                                <option>${measureTypeF}</option>
+                                <c:forEach items="${dateMeasure}" var="value">
+                                    <c:if test="${value ne measureTypeF}">
+                                        <option>${value}</option>
+                                    </c:if>
+                                </c:forEach>
+                            </select>
+                            <span class="input-group-addon" id="addon-type"><i class="glyphicon glyphicon-arrow-right"></i></span>
+                        </div>
                     </div>
                 </div>
             </form>
+        </div>
 
-        </div-->
+        </div>
         <div class="ct-chart ct-major-tenth"></div>
     </sec:authorize>
 
@@ -95,6 +100,7 @@
 
     <script src="static/chartist/dist/chartist.js"></script>
     <script src="static/chartist/dist/chartist-plugin-threshold.js"></script>
+    <script src="static/chartist/dist/chartist-goal-line.js"></script>
 
     <script>
         var data = ${data};
@@ -103,10 +109,18 @@
             axisY: {
                 onlyInteger: true
             },
+            axisX: {
+                labelInterpolationFnc: function(value) {
+                if(value=='${dateNow}'){
+                return '> '+value + ' <';
+                }
+                  return value;
+                },
+              },
             plugins: [
-                Chartist.plugins.ctThreshold({
-                    threshold: 0,
-                }),
+             Chartist.plugins.ctThreshold({
+                                threshold: 0,
+                            }),
             ]
         });
 

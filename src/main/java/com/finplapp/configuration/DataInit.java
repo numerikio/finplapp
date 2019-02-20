@@ -17,7 +17,7 @@ import java.util.Set;
 @Component
 @PropertySource({
         "classpath:login_data.properties",
-        "classpath:default_types.properties"
+        "classpath:default_properties.properties"
 })
 public class DataInit {
 

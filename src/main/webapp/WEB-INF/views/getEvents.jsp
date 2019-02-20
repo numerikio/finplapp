@@ -15,8 +15,8 @@
         <div class="container-fluid">
 
             <div class="btn-group-lg btn-group-justified">
-                <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus-sign"></i></a>
-                <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus-sign"></i></a>
+                <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus"></i><i class="glyphicon glyphicon-usd"></i></a>
+                <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i><i class="glyphicon glyphicon-usd"></i></a>
                 <a href="#" class="btn btn-primary disabled"><i class="glyphicon glyphicon-stats" aria-disabled="true"></i></a>
                 <a href="/" class="btn btn-primary"><i class="glyphicon glyphicon-home"></i></a>
             </div>
