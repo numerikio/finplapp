@@ -50,11 +50,8 @@
                             <a href="newuser" class="btn-lg btn-primary pull-right">registration</a>
                         </div>
                     </div>
-
                 </form>
-
             </div>
-
         </div>
         <br>
             <br>

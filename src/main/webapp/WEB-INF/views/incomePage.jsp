@@ -24,9 +24,11 @@
             <div class="form-group-lg input-group">
                 <span class="input-group-addon" id="addon-type"><i class="glyphicon glyphicon-list-alt"></i></span>
                 <select name="incomeTypes" id="incomeTypes" class="form-control" aria-describedby="addon-type">
-                    <option value="SOMETHING_OTHER"></option>
+                    <option value="NOT_SELECTED"></option>
                     <c:forEach items="${incomeTypes}" var="value">
-                        <option>${value.type}</option>
+                         <c:if test="${value.type ne 'NOT_SELECTED'}">
+                            <option>${value.type}</option>
+                         </c:if>
                     </c:forEach>
                 </select>
             </div>
@@ -43,9 +45,7 @@
             <br>
 
             <button type="submit" class="btn-lg btn-primary"><i class="glyphicon glyphicon-ok"></i></button>
-
         </form>
-
 
     </div>
 </body>

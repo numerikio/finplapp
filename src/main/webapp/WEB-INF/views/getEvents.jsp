@@ -28,7 +28,7 @@
 
     <div class="container">
         <form class="form-inline" action="getAllEventOfDate">
-            <h2>View events</h2>
+            <h2>View Ledger</h2>
 
             <%@include file="calendarWithPeriod.jsp" %>
 

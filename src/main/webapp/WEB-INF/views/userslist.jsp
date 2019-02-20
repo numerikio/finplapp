@@ -33,7 +33,6 @@
 				        <th>SSO ID</th>
 				        <th width="100"></th>
 				        <th width="100"></th>
-
 					</tr>
 		    	</thead>
 	    		<tbody>

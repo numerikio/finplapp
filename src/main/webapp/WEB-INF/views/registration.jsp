@@ -96,12 +96,11 @@
 					   </c:when>
 					</c:choose--%>
 					<select path="userProfiles" id="userProfiles">
-
-                                        <c:forEach items="${roles}" var="value">
-                                            <option>${value.type}</option>
-                                        </c:forEach>
-                                    </select>
-					</div>
+                       <c:forEach items="${roles}" var="value">
+                          <option>${value.type}</option>
+                       </c:forEach>
+                    </select>
+				  </div>
 				</div>
 			</div>
  </sec:authorize>

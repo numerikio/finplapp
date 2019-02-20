@@ -22,11 +22,9 @@
 
     <nav class="navbar-lg navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
-
             <div class="btn-group-lg btn-group-justified">
-                <a href="logout" class="btn btn-success">${loggedinuser} <i class="glyphicon glyphicon-log-out"></i></a>
+               <a href="logout" class="btn btn-success">${loggedinuser} <i class="glyphicon glyphicon-log-out"></i></a>
             </div>
-
         </div>
     </nav>
     <br>

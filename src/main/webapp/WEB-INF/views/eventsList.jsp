@@ -22,9 +22,10 @@
             <table class="table table-condensed">
                 <thead>
                     <tr>
-                        <th>amount</th>
-                        <th>messege</th>
-                        <th width="100"></th>
+                        <th width="20%">amount</th>
+                        <th width="50%">messege</th>
+                        <th width="20%">type</th>
+                        <th width="10%"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,9 +33,10 @@
 
                         <c:forEach items="${periodOfTime.costList}" var="cost">
                             <tr class="danger">
-                                <td valign="middle">${cost.amount}</td>
-                                <td valign="middle">${cost.message}</td>
-                                <td valign="middle">
+                                <td vertical-align="middle">${cost.amount}</td>
+                                <td>${cost.message}</td>
+                                <td>${cost.getCostType().getType()}</td>
+                                <td>
                                     <form action="delete-cost">
                                         <input type="hidden" name="dates" value="${dates}">
                                         <input type="hidden" name="date" value=${periodOfTime.localDate}>
@@ -52,6 +54,7 @@
                             <tr class="success">
                                 <td valign="middle">${income.amount}</td>
                                 <td valign="middle">${income.message}</td>
+                                <td valign="middle">${income.getTypeIncome().getType()}</td>
                                 <td valign="middle">
                                     <form action="delete-income">
                                         <input type="hidden" name="dates" value="${dates}">
