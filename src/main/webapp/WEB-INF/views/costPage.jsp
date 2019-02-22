@@ -40,7 +40,7 @@
             <br>
             <div class="form-group-lg input-group">
                 <span class="input-group-addon" id="addon-amount"><i class="glyphicon glyphicon-usd"></i></span>
-                <input type="number" autocomplete="off" class="form-control" aria-describedby="addon-amount" name="amount" id="amount" placeholder="amount" pattern="^[ 0-9]+$" required title="only numbers please" />
+                <input type="number" min=0 step=1 autocomplete="off" class="form-control" aria-describedby="addon-amount" name="amount" id="amount" placeholder="amount" required title="only numbers please" />
             </div>
             <br>
             <div class="form-group-lg input-group">

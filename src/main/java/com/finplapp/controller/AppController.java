@@ -155,6 +155,7 @@ public class AppController {
 
     @RequestMapping("getEvents")
     public String getEvents() {
+        updateDatasOfPeriod(getSortedPeriodOfTimeList());
         return "getEvents";
     }
 

@@ -6,7 +6,7 @@
 
 <head>
     <title>Events List</title>
-     <link rel="shortcut icon" href="favicon.ico?ver=0" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico?ver=0" type="image/x-icon">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link href="static/app_css.css" rel="stylesheet">
 </head>
@@ -16,9 +16,45 @@
     <br>
     <br>
     <c:forEach items="${periodOfTimes}" var="periodOfTime">
-    <br>
+        <br>
         <div class="container event-list">
-            <h3>${periodOfTime.localDate}</h3>
+
+            <div class="row row-centered">
+                <div class="col-sm-4 ">
+                    <h4>${periodOfTime.localDate}</h4>
+                </div>
+
+                <div class="col-sm-8 col-xs-12">
+                    <div class="row row-centered">
+                        <div class="col-sm-4">
+                            <b>total cash balance :</b>
+                        </div>
+                        <div class="col-sm-4">
+                            <b>${periodOfTime.getBalance()}</b>
+                        </div>
+                    </div>
+                    <div class="row row-centered">
+                        <div class="col-sm-4">
+                            on this day :
+                            <c:choose>
+                                <c:when test="${periodOfTime.getBalanceEndOfPeriod() gt 0}">
+                                    <span class="label label-success"><i class="glyphicon glyphicon-arrow-up"></i></span>
+                                </c:when>
+                                <c:when test="${periodOfTime.getBalanceEndOfPeriod() lt 0}">
+                                    <span class="label label-danger"><i class="glyphicon glyphicon-arrow-down"></i></span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="label label-default"><i class="glyphicon glyphicon-resize-small"></i></span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                        <div class="col-sm-4">
+                            ${periodOfTime.getBalanceEndOfPeriod()}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <table class="table table-condensed">
                 <thead>
                     <tr>
@@ -74,5 +110,3 @@
 </body>
 
 </html>
-
-

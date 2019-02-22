@@ -56,10 +56,6 @@ public class PeriodOfTime implements Comparable<PeriodOfTime> {
         this.user = user;
     }
 
-    public String toString() {
-        return "PeriodOfTime " + "[id = " + id + ", data = " + localDate.toString() + "]";
-    }
-
     public List<Cost> getCostList() {
         return costList;
     }
@@ -84,9 +80,30 @@ public class PeriodOfTime implements Comparable<PeriodOfTime> {
         this.balance = balance;
     }
 
+    public Double getBalanceEndOfPeriod() {
+        return getSum(getIncomeList()) - getSum(getCostList());
+    }
+
+    private Double getSum(List<? extends Ledger> ledgers) {
+        Double result = 0.0;
+        for (Ledger ledger : ledgers
+        ) {
+            result += ledger.getAmount();
+        }
+        return result;
+    }
+
     @Override
     public int compareTo(PeriodOfTime o) {
         return Comparator.comparing(PeriodOfTime::getLocalDate).compare(this, o);
+    }
 
+    @Override
+    public String toString() {
+        return "PeriodOfTime{" +
+                "id=" + id +
+                ", localDate=" + localDate +
+                ", user=" + user +
+                '}';
     }
 }

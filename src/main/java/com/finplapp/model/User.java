@@ -2,6 +2,7 @@ package com.finplapp.model;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -94,48 +95,25 @@ public class User implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((ssoId == null) ? 0 : ssoId.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id) &&
+                ssoId.equals(user.ssoId);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof User))
-            return false;
-        User other = (User) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        if (ssoId == null) {
-            if (other.ssoId != null)
-                return false;
-        } else if (!ssoId.equals(other.ssoId))
-            return false;
-        return true;
+    public int hashCode() {
+        return Objects.hash(id, ssoId);
     }
 
     @Override
     public String toString() {
-        return "User [id=" + id + ", ssoId=" + ssoId + ", password=" + password
-                +/* ", firstName=" + firstName + ", lastName=" + lastName
-				+*/ ", email=" + email + "]";
+        return "User{" +
+                "id=" + id +
+                ", ssoId='" + ssoId + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
-
-	/*public Set<PeriodOfTime> getPeriodOfTimes() {
-		return periodOfTimes;
-	}*/
-
-	/*public void setPeriodOfTimes(Set<PeriodOfTime> periodOfTimes) {
-		this.periodOfTimes = periodOfTimes;
-	}*/
 }

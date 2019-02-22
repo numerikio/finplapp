@@ -67,11 +67,11 @@
                         <div class="form-group-lg input-group">
                             <select name="measureTypeF" id="measureTypeF" class="form-control" aria-describedby="addon-type">
                                 <option>${measureTypeF}</option>
-                                <c:forEach items="${dateMeasure}" var="value">
-                                    <c:if test="${value ne measureTypeF}">
-                                        <option>${value}</option>
-                                    </c:if>
-                                </c:forEach>
+                               <c:forEach items="${dateMeasure}" var="value">
+                                  <c:if test="${value ne measureTypeF}">
+                                     <option>${value}</option>
+                                  </c:if>
+                               </c:forEach>
                             </select>
                             <span class="input-group-addon" id="addon-type"><i class="glyphicon glyphicon-arrow-right"></i></span>
                         </div>
@@ -101,7 +101,9 @@
     <script src="static/chartist/dist/chartist.js"></script>
     <script src="static/chartist/dist/chartist-plugin-threshold.js"></script>
     <script src="static/chartist/dist/chartist-goal-line.js"></script>
-
+<c:if test="${value ne measureTypeF}">
+                                        <option>${value}</option>
+                                    </c:if>
     <script>
         var data = ${data};
         new Chartist.Line('.ct-chart', data, {
