@@ -55,4 +55,9 @@ public class PeriodOfTimeServiceImpl implements PeriodOfTimeService {
         return periodOfTimeRepository.findOne(id);
     }
 
+    @Override
+    public List<PeriodOfTime> findByLocalDate(LocalDate localDate) {
+        return periodOfTimeRepository.findByLocalDate(localDate);
+    }
+
 }

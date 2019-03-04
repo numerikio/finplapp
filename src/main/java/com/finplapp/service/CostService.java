@@ -1,6 +1,8 @@
 package com.finplapp.service;
 
-import com.finplapp.model.Cost;
+import com.finplapp.model.*;
+
+import java.util.List;
 
 public interface CostService {
 
@@ -11,4 +13,8 @@ public interface CostService {
     void updateCost(Cost cost);
 
     void deleteCost(Long id);
+
+    List<Cost> findByCostType(CostType costType);
+
+    List<Cost> findByPeriodOfTimeAndCostType (PeriodOfTime periodOfTime, LedgerEntryType ledgerEntryType);
 }

@@ -1,5 +1,7 @@
 package com.finplapp.service;
 
+import com.finplapp.model.LedgerEntryType;
+
 import java.util.List;
 
 public interface LedgerTypeService<T> {

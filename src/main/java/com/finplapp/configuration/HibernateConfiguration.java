@@ -22,8 +22,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@ComponentScan({ "com.finplapp.configuration" })
-@PropertySource(value = { "classpath:hibernate.properties" })
+@ComponentScan({"com.finplapp.configuration"})
+@PropertySource(value = {"classpath:hibernate.properties"})
 @EnableJpaRepositories("com.finplapp.repository")
 public class HibernateConfiguration {
 
@@ -34,10 +34,11 @@ public class HibernateConfiguration {
     public LocalSessionFactoryBean sessionFactory() {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource());
-        sessionFactory.setPackagesToScan(new String[] { "com.finplapp.model" });
+        sessionFactory.setPackagesToScan(new String[]{"com.finplapp.model"});
         sessionFactory.setHibernateProperties(hibernateProperties());
         return sessionFactory;
-     }
+    }
+
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
@@ -49,6 +50,7 @@ public class HibernateConfiguration {
 
         return entityManagerFactoryBean;
     }
+
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -58,21 +60,21 @@ public class HibernateConfiguration {
         dataSource.setPassword(environment.getRequiredProperty("db.password"));
         return dataSource;
     }
-    
+
     private Properties hibernateProperties() {
         Properties properties = new Properties();
         properties.put("hibernate.dialect", environment.getRequiredProperty("hibernate.dialect"));
         properties.put("hibernate.show_sql", environment.getRequiredProperty("hibernate.show_sql"));
-       properties.put("hibernate.format_sql", environment.getRequiredProperty("hibernate.format_sql"));
+        properties.put("hibernate.format_sql", environment.getRequiredProperty("hibernate.format_sql"));
         properties.put("hibernate.hbm2ddl.auto", environment.getRequiredProperty("hibernate.hbm2ddl.auto"));
-        return properties;        
+        return properties;
     }
-    
-	@Bean
+
+    @Bean
     public JpaTransactionManager transactionManager(SessionFactory s) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
-       return transactionManager;
+        return transactionManager;
     }
 }
 

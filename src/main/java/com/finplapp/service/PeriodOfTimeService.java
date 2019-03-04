@@ -22,4 +22,6 @@ public interface PeriodOfTimeService {
     void deletePeriodOfTime(PeriodOfTime periodOfTime);
 
     PeriodOfTime findById(Long id);
+
+    List<PeriodOfTime> findByLocalDate(LocalDate localDate);
 }

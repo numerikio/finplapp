@@ -4,6 +4,12 @@ import javax.persistence.*;
 
 @MappedSuperclass
 public abstract class LedgerEntryType {
+    public LedgerEntryType() {
+    }
+
+    public LedgerEntryType(String type) {
+        this.type = type;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -1,6 +1,7 @@
 package com.finplapp.service;
 
 import com.finplapp.model.CostType;
+import com.finplapp.model.LedgerEntryType;
 import com.finplapp.repository.CostTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

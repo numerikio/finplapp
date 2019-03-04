@@ -1,15 +1,21 @@
 package com.finplapp.service;
 
-import com.finplapp.model.Cost;
+import com.finplapp.model.*;
+import com.finplapp.repository.CostRepository;
 import com.finplapp.repository.LedgerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service("costService")
 public class CostServiceImpl implements CostService {
 
     @Autowired
-    LedgerRepository<Cost,Long> ledgerRepository;
+    private LedgerRepository<Cost, Long> ledgerRepository;
+
+    @Autowired
+    private CostRepository costRepository;
 
     @Override
     public void saveCost(Cost cost) {
@@ -35,5 +41,22 @@ public class CostServiceImpl implements CostService {
     public void deleteCost(Long id) {
         ledgerRepository.delete(id);
     }
+
+    @Override
+    public List<Cost> findByCostType(CostType costType) {
+
+        return costRepository.findByCostType(costType);
+    }
+
+    @Override
+    public List<Cost> findByPeriodOfTimeAndCostType(PeriodOfTime periodOfTime, LedgerEntryType ledgerEntryType) {
+        return costRepository.findByPeriodOfTimeAndCostType(periodOfTime, ledgerEntryType);
+    }
+
+   /* @Override
+    public List<Cost> findByPeriodOfTimeAndCostType(PeriodOfTime periodOfTime, CostType costType) {
+        return costRepository.findByPeriodOfTimeAndCostType(periodOfTime, costType);
+    }*/
+
 }
 

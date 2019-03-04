@@ -11,8 +11,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.finplapp.DateMeasure;
+import com.finplapp.chartist.DatasOfLineDiagram;
+import com.finplapp.chartist.DatasOfPieChartDiagrams;
+import com.finplapp.chartist.JsonProviderOfDataForDiagrams;
+import com.finplapp.chartist.ProviderOfDataForDiagrams;
 import com.finplapp.model.*;
 import com.finplapp.service.*;
 import org.slf4j.Logger;
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
+
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -78,25 +82,21 @@ public class AppController {
     @Autowired
     private IncomeTypeService incomeTypeService;
 
-    private final String defaultDateMeaserePast = "WEEK";
-    private final String defaultDateMeasereFuture = "MONTH";
-    private final long defaultDateQuantityPast = 1L;
-    private final long defaultDateQuantityFuture = 9L;
+    @Autowired
+    private ProviderOfDataForDiagrams providerOfDataForDiagrams;
+
+    private final String DEFAULT_DATE_MEASER_PAST = "WEEK";
+    private final String DEFAULT_DATE_MEASER_FUTURE = "MONTH";
+    private final long DEFAULT_DATE_QUANTITY_PAST = 1L;
+    private final long DEFAULT_DATE_QUANTITY_FUTURE = 9L;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String mainPage(ModelMap model) throws IOException {
+    public String mainPage(ModelMap model) {
 
-        List<LocalDate> targetLocalDates = getAllDatesOfPeriod(
-                getLocalDateByDateMeasure(DateMeasure.valueOf(defaultDateMeaserePast), -(defaultDateQuantityPast)),
-                getLocalDateByDateMeasure(DateMeasure.valueOf(defaultDateMeasereFuture), defaultDateQuantityFuture));
-        List<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
-        updateDatasOfPeriod(periodOfTimes);
-        periodOfTimes = getLimitedListPeriodOfTime(periodOfTimes, targetLocalDates);
+        String jString = providerOfDataForDiagrams.getData(getDatasOfLineDiagram(
+                DEFAULT_DATE_MEASER_PAST, DEFAULT_DATE_MEASER_FUTURE,
+                DEFAULT_DATE_QUANTITY_PAST, DEFAULT_DATE_QUANTITY_FUTURE));
 
-        List<List> lists = new ArrayList<>();
-        lists.add(getBalanceListAllPeriods(periodOfTimes));
-        String jString = new ObjectMapper().writeValueAsString
-                (new DataForChart(getTimeStepAllPeriodForGraf(periodOfTimes), lists));
         model.addAttribute("dateNow", getLabelNowForGraf());
         model.addAttribute("dateMeasure", DateMeasure.values());
         model.addAttribute("loggedinuser", getPrincipal());
@@ -109,27 +109,19 @@ public class AppController {
                            @RequestParam("beforeNow") Long beforeNow,
                            @RequestParam("afterNow") Long afterNow,
                            @RequestParam("measureTypeF") String measureTypeF,
-                           ModelMap model) throws IOException {
+                           ModelMap model) {
 
         if (measureTypeP == null || beforeNow == null) {
-            measureTypeP = defaultDateMeaserePast;
-            beforeNow = defaultDateQuantityPast;
+            measureTypeP = DEFAULT_DATE_MEASER_PAST;
+            beforeNow = DEFAULT_DATE_QUANTITY_PAST;
         }
         if (measureTypeF == null || afterNow == null) {
-            measureTypeF = defaultDateMeasereFuture;
-            afterNow = defaultDateQuantityFuture;
+            measureTypeF = DEFAULT_DATE_MEASER_FUTURE;
+            afterNow = DEFAULT_DATE_QUANTITY_FUTURE;
         }
-        List<LocalDate> targetLocalDates = getAllDatesOfPeriod(getLocalDateByDateMeasure(DateMeasure.valueOf(measureTypeP), -(beforeNow)),
-                getLocalDateByDateMeasure(DateMeasure.valueOf(measureTypeF), afterNow));
-        List<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
-        updateDatasOfPeriod(periodOfTimes);
-        periodOfTimes = getLimitedListPeriodOfTime(periodOfTimes, targetLocalDates);
 
-        List<List> lists = new ArrayList<>();
-        lists.add(getBalanceListAllPeriods(periodOfTimes));
-
-        String jString = new ObjectMapper().writeValueAsString
-                (new DataForChart(getTimeStepAllPeriodForGraf(periodOfTimes), lists));
+        String jString = new JsonProviderOfDataForDiagrams()
+                .getData(getDatasOfLineDiagram(measureTypeP, measureTypeF, beforeNow, afterNow));
 
         model.addAttribute("beforeNow", beforeNow);
         model.addAttribute("afterNow", afterNow);
@@ -256,6 +248,109 @@ public class AppController {
     }
 
     //===================End Income=================================
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    @RequestMapping(value = "userStatistics")
+    public String userStatistics(ModelMap model) {
+        return "userStatistics";
+    }
+
+    @RequestMapping(value = "getUserStatistics")
+    public String userPrintStatistics(@RequestParam("dates") String dates,
+                                      ModelMap model) {
+        String jString = providerOfDataForDiagrams.getData(getDatasOfPieChartDiagrams(dates, "Cost"));
+        String jString2 = providerOfDataForDiagrams.getData(getDatasOfPieChartDiagrams(dates, "Income"));
+        model.addAttribute("dates", dates);
+        model.addAttribute("data", jString);
+        model.addAttribute("data2", jString2);
+        return "userStatistics";
+    }
+
+    private DatasOfPieChartDiagrams getDatasOfPieChartDiagrams(String dates, String extenderLedger) {
+        Map<? extends LedgerEntryType, List<? extends Ledger>> map = getMapOfLedgerListsByTypes(getAllDatesOfPeriod(getFirstAndLastDaysWihtString(dates)), extenderLedger);
+        List<String> labels = new ArrayList();
+        List<Double> series = new ArrayList();
+        List<LedgerEntryType> types = map.keySet().stream().collect(Collectors.toList());
+        Collections.sort(types, (o1, o2) -> o1.getId().compareTo(o2.getId()));
+        for (LedgerEntryType type : types
+        ) {
+            if (!map.get(type).isEmpty()) {
+                labels.add(type.getType());
+                series.add(getSumAmount(map.get(type)));
+            }
+        }
+        return new DatasOfPieChartDiagrams(labels, series);
+    }
+
+    private Double getSumAmount(List<? extends Ledger> ledgers) {
+
+        Double sum = 0.0;
+
+        for (Ledger ledger : ledgers
+        ) {
+            sum += ledger.getAmount();
+        }
+        return sum;
+    }
+
+    private Map<? extends LedgerEntryType, List<? extends Ledger>> getMapOfLedgerListsByTypes(List<LocalDate> localDates, String extenderLedger) {
+
+        User user = userService.findBySSO(getPrincipal());
+
+        Map<LedgerEntryType, List<? extends Ledger>> stringListMap = new HashMap<>();
+
+        List<? extends LedgerEntryType> ledgerEntryTypeList = getLedgerEntryTypeList(extenderLedger);
+
+        for (LocalDate date : localDates
+        ) {
+            for (LedgerEntryType type : ledgerEntryTypeList
+            ) {
+                if (stringListMap.containsKey(type)) {
+                    stringListMap.get(type).addAll(getListByPeriodOfTimeAndType(user, date, type, extenderLedger));
+                } else {
+                    stringListMap.put(type, getListByPeriodOfTimeAndType(user, date, type, extenderLedger));
+                }
+            }
+        }
+        return stringListMap;
+    }
+
+    private List getListByPeriodOfTimeAndType(User user, LocalDate date, LedgerEntryType type, String extenderLedger) {
+        List list;
+        switch (extenderLedger) {
+
+            case "Cost":
+                list = costService.findByPeriodOfTimeAndCostType(periodOfTimeService.findByLocalDateAndUser(date, user), type);
+                break;
+            case "Income":
+                list = incomeService.findByPeriodOfTimeAndIncomeType(periodOfTimeService.findByLocalDateAndUser(date, user), type);
+                break;
+            default:
+                list = null;
+                logger.error("Wrong name of extender Ledger...");
+        }
+        return list;
+    }
+
+    private List<? extends LedgerEntryType> getLedgerEntryTypeList(String extenderLedger) {
+
+        List<? extends LedgerEntryType> types;
+
+        switch (extenderLedger) {
+            case "Cost":
+                types = costTypeService.findAll();
+                break;
+            case "Income":
+                types = incomeTypeService.findAll();
+                break;
+            default:
+                types = null;
+                logger.error("wrong name of extender Ledger");
+        }
+        return types;
+    }
+    //????????????????????????????????????????????????????????????????????????
 
     /**
      * This method will provide the medium to add a new user.
@@ -549,5 +644,25 @@ public class AppController {
             }
         }
         return periods;
+    }
+
+    private DatasOfLineDiagram getDatasOfLineDiagram(String dateMeaserePast, String dateMeasereFuture,
+                                                     long dateQuantityPast, long dateQuantityFuture) {
+        List<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
+        updateDatasOfPeriod(periodOfTimes);
+        periodOfTimes = getLimitedListPeriodOfTime(periodOfTimes,
+                getTargetLocalDates(dateMeaserePast, dateMeasereFuture, dateQuantityPast, dateQuantityFuture));
+
+        List<List> lists = new ArrayList<>();
+        lists.add(getBalanceListAllPeriods(periodOfTimes));
+        return new DatasOfLineDiagram(getTimeStepAllPeriodForGraf(periodOfTimes), lists);
+    }
+
+    private List<LocalDate> getTargetLocalDates(String dateMeaserePast, String dateMeasereFuture,
+                                                long dateQuantityPast, long dateQuantityFuture) {
+        List<LocalDate> targetLocalDates = getAllDatesOfPeriod(
+                getLocalDateByDateMeasure(DateMeasure.valueOf(dateMeaserePast), -(dateQuantityPast)),
+                getLocalDateByDateMeasure(DateMeasure.valueOf(dateMeasereFuture), dateQuantityFuture));
+        return targetLocalDates;
     }
 }

@@ -17,7 +17,7 @@
             <div class="btn-group-lg btn-group-justified">
                 <a href="Cost" class="btn btn-primary"><i class="glyphicon glyphicon-minus"></i><i class="glyphicon glyphicon-usd"></i></a>
                 <a href="Income" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i><i class="glyphicon glyphicon-usd"></i></a>
-                <a href="#" class="btn btn-primary disabled"><i class="glyphicon glyphicon-stats" aria-disabled="true"></i></a>
+                <a href="userStatistics" class="btn btn-primary"><i class="glyphicon glyphicon-stats"></i></a>
                 <a href="/" class="btn btn-primary"><i class="glyphicon glyphicon-home"></i></a>
             </div>
 
@@ -28,8 +28,8 @@
 
     <div class="container">
         <form class="form-inline" action="getAllEventOfDate">
-            <h2>View Ledger</h2>
 
+            <h2>View Ledger</h2>
             <%@include file="calendarWithPeriod.jsp" %>
 
             <button type="submit" class="btn-lg btn-primary"><i class="glyphicon glyphicon-search"></i></button>

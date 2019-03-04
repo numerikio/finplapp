@@ -1,6 +1,7 @@
 package com.finplapp.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 public class Cost extends Ledger {
