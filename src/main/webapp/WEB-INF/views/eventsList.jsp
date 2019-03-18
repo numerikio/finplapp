@@ -65,18 +65,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <c:if test="${not empty periodOfTime.costList}">
+                    <c:if test="${not empty periodOfTime.expenditureList}">
 
-                        <c:forEach items="${periodOfTime.costList}" var="cost">
+                        <c:forEach items="${periodOfTime.expenditureList}" var="expenditure">
                             <tr class="danger">
-                                <td vertical-align="middle">${cost.amount}</td>
-                                <td>${cost.message}</td>
-                                <td>${cost.getCostType().getType()}</td>
+                                <td vertical-align="middle">${expenditure.amount}</td>
+                                <td>${expenditure.message}</td>
+                                <td>${expenditure.getExpenditureType().getType()}</td>
                                 <td>
-                                    <form action="delete-cost">
+                                    <form action="delete-expenditure">
                                         <input type="hidden" name="dates" value="${dates}">
                                         <input type="hidden" name="date" value=${periodOfTime.localDate}>
-                                        <input type="hidden" name="cost.id" value=${cost.id}>
+                                        <input type="hidden" name="expenditure.id" value=${expenditure.id}>
                                         <button type="submit" class="btn-lg btn-light"><i class="glyphicon glyphicon-trash"></i></button>
                                     </form>
                                 </td>

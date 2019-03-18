@@ -5,16 +5,12 @@ import com.finplapp.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -24,7 +20,7 @@ public class AnalystController {
     static final Logger logger = LoggerFactory.getLogger(AnalystController.class);
 
     @Autowired
-    private CostTypeService costTypeService;
+    private ExpenditureTypeService expenditureTypeService;
 
     @Autowired
     private IncomeTypeService incomeTypeService;
@@ -33,7 +29,7 @@ public class AnalystController {
     private PeriodOfTimeService periodOfTimeService;
 
     @Autowired
-    private CostService costService;
+    private ExpenditureService expenditureService;
 
     @Autowired
     private IncomeService incomeService;
@@ -48,10 +44,10 @@ public class AnalystController {
 
     @RequestMapping(value = "categories", method = RequestMethod.GET)
     public String categories(ModelMap model) {
-        List<CostType> costTypeList = costTypeService.findAll();
+        List<ExpenditureType> expenditureTypeList = expenditureTypeService.findAll();
         List<IncomeType> incomeTypeList = incomeTypeService.findAll();
 
-        model.addAttribute("costsType", costTypeList);
+        model.addAttribute("expenditureType", expenditureTypeList);
         model.addAttribute("incomesType", incomeTypeList);
         model.addAttribute("loggedinuser", "analyst");
         return "categoriesPage";
@@ -62,9 +58,9 @@ public class AnalystController {
                                 @RequestParam("name") String name, ModelMap model) {
         if (name != null) {
             switch (action) {
-                case "addCostType": {
-                    if (costTypeService.findByType(name) == null) {
-                        costTypeService.saveType(new CostType(name));
+                case "addExpenditureType": {
+                    if (expenditureTypeService.findByType(name) == null) {
+                        expenditureTypeService.saveType(new ExpenditureType(name));
                     }
                     break;
                 }
@@ -74,10 +70,10 @@ public class AnalystController {
                     }
                     break;
                 }
-                case "deleteCostType": {
-                    if (costTypeService.findByType(name) != null) {
-                        deleteLedgerEntryType(costService.findByCostType(costTypeService.findByType(name)));
-                        costTypeService.deleteType(costTypeService.findByType(name));
+                case "deleteExpenditureType": {
+                    if (expenditureTypeService.findByType(name) != null) {
+                        deleteLedgerEntryType(expenditureService.findByExpenditureType(expenditureTypeService.findByType(name)));
+                        expenditureTypeService.deleteType(expenditureTypeService.findByType(name));
                     }
                     break;
                 }
@@ -88,8 +84,6 @@ public class AnalystController {
                     }
                     break;
                 }
-                default:
-                    model.addAttribute("errorMessage", "not found...");
             }
         }
         return "redirect:categories";
@@ -99,9 +93,9 @@ public class AnalystController {
 
         for (Ledger ledger : ledgers
         ) {
-            if (ledger instanceof Cost) {
-                ((Cost) ledger).setCostType(costTypeService.findByType("NOT_SELECTED"));
-                costService.saveCost((Cost) ledger);
+            if (ledger instanceof Expenditure) {
+                ((Expenditure) ledger).setExpenditureType(expenditureTypeService.findByType("NOT_SELECTED"));
+                expenditureService.saveExpenditure((Expenditure) ledger);
             }
             if (ledger instanceof Income) {
                 ((Income) ledger).setTypeIncome(incomeTypeService.findByType("NOT_SELECTED"));
@@ -113,12 +107,12 @@ public class AnalystController {
     @RequestMapping(value = "getAll", method = RequestMethod.GET)
     public String getAll(@RequestParam("name") String name) {
 
-        List<Cost> costList = costService.findByCostType(costTypeService.findByType(name));
+        List<Expenditure> expenditureList = expenditureService.findByExpenditureType(expenditureTypeService.findByType(name));
 
-        for (Cost cost : costList
+        for (Expenditure expenditure : expenditureList
         ) {
-            System.out.println(cost.getPeriodOfTime().getLocalDate() + "\t" + cost.getCostType().getType() + "\t" +
-                    cost.getAmount());
+            System.out.println(expenditure.getPeriodOfTime().getLocalDate() + "\t" + expenditure.getExpenditureType().getType() + "\t" +
+                    expenditure.getAmount());
         }
 
         return "redirect:categories";

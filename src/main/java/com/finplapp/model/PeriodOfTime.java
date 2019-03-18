@@ -23,13 +23,12 @@ public class PeriodOfTime implements Comparable<PeriodOfTime> {
     private User user;
 
     @OneToMany(mappedBy = "periodOfTime", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Cost> costList = new ArrayList<>();
+    private List<Expenditure> expenditureList = new ArrayList<>();
 
     @OneToMany(mappedBy = "periodOfTime", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Income> incomeList = new ArrayList<>();
 
     public PeriodOfTime() {
-
     }
 
     public Long getId() {
@@ -56,12 +55,12 @@ public class PeriodOfTime implements Comparable<PeriodOfTime> {
         this.user = user;
     }
 
-    public List<Cost> getCostList() {
-        return costList;
+    public List<Expenditure> getExpenditureList() {
+        return expenditureList;
     }
 
-    public void setCostList(List<Cost> costList) {
-        this.costList = costList;
+    public void setExpenditureList(List<Expenditure> expenditureList) {
+        this.expenditureList = expenditureList;
     }
 
     public List<Income> getIncomeList() {
@@ -81,7 +80,7 @@ public class PeriodOfTime implements Comparable<PeriodOfTime> {
     }
 
     public Double getBalanceEndOfPeriod() {
-        return getSum(getIncomeList()) - getSum(getCostList());
+        return getSum(getIncomeList()) - getSum(getExpenditureList());
     }
 
     private Double getSum(List<? extends Ledger> ledgers) {

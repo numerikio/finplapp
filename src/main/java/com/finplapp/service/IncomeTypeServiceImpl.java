@@ -30,6 +30,6 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
 
     @Override
     public void deleteType(IncomeType incomeType) {
-       incomeTypeRepository.delete(incomeType);
+        incomeTypeRepository.delete(incomeType);
     }
 }

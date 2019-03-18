@@ -7,7 +7,7 @@
 
 <head>
 
-    <title>Cost Page</title>
+    <title>Expenditure Page</title>
      <link rel="shortcut icon" href="favicon.ico?ver=0" type="image/x-icon">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -20,17 +20,17 @@
     <br>
 
     <div class="container">
-        <form action="saveCost">
-            <h2>Add cost</h2>
+        <form action="saveExpenditure">
+            <h2>Add expenditure</h2>
 
             <%@include file="calendar.jsp" %>
 
             <br>
             <div class="form-group-lg input-group">
                 <span class="input-group-addon" id="addon-type"><i class="glyphicon glyphicon-list-alt"></i></span>
-                <select name="costTypes" id="costTypes" class="form-control" aria-describedby="addon-type">
+                <select name="expenditureTypes" id="expenditureTypes" class="form-control" aria-describedby="addon-type">
                     <option value="NOT_SELECTED"></option>
-                    <c:forEach items="${costTypes}" var="value">
+                    <c:forEach items="${expenditureTypes}" var="value">
                        <c:if test="${value.type ne 'NOT_SELECTED'}">
                          <option>${value.type}</option>
                        </c:if>

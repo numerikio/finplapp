@@ -13,7 +13,7 @@ import java.util.List;
 public class PeriodOfTimeServiceImpl implements PeriodOfTimeService {
 
     @Autowired
-    PeriodOfTimeRepository periodOfTimeRepository;
+    private PeriodOfTimeRepository periodOfTimeRepository;
 
     @Override
     public void savePeriodOfTime(PeriodOfTime periodOfTime) {
@@ -42,7 +42,7 @@ public class PeriodOfTimeServiceImpl implements PeriodOfTimeService {
 
     @Override
     public List<PeriodOfTime> findEmptiesPeriods(User user) {
-        return periodOfTimeRepository.findByCostListIsNullAndIncomeListIsNullAndUser(user);
+        return periodOfTimeRepository.findByExpenditureListIsNullAndIncomeListIsNullAndUser(user);
     }
 
     @Override

@@ -41,12 +41,12 @@
             <div class="row row-centered">
                 <div class="col-sm-6">
                     <br>
-                    <button type="submit" class="btn-lg btn-success" name="action" value="addCostType">Add to list of cost type </button>
+                    <button type="submit" class="btn-lg btn-success" name="action" value="addExpenditureType">Add to list of expenditure type </button>
                     <br>
-                    <button type="submit" class="btn-lg btn-danger" name="action" value="deleteCostType">Delete cost type </button>
+                    <button type="submit" class="btn-lg btn-danger" name="action" value="deleteExpenditureType">Delete expenditure type </button>
                     <br>
                     <br>
-                    <c:forEach items="${costsType}" var="value">
+                    <c:forEach items="${expenditureType}" var="value">
                         <option>${value.getType()}</option>
                     </c:forEach>
                 </div>

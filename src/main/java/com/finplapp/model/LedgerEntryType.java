@@ -4,6 +4,7 @@ import javax.persistence.*;
 
 @MappedSuperclass
 public abstract class LedgerEntryType {
+
     public LedgerEntryType() {
     }
 

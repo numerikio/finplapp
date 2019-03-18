@@ -7,10 +7,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface PeriodOfTimeRepository extends JpaRepository<PeriodOfTime,Long> {
-    PeriodOfTime findByLocalDateAndUser (LocalDate localDate, User user);
-    List<PeriodOfTime> findByUser (User user);
-    List<PeriodOfTime> findByCostListIsNullAndIncomeListIsNullAndUser(User user);
+public interface PeriodOfTimeRepository extends JpaRepository<PeriodOfTime, Long> {
+
+    PeriodOfTime findByLocalDateAndUser(LocalDate localDate, User user);
+
+    List<PeriodOfTime> findByUser(User user);
+
+    List<PeriodOfTime> findByExpenditureListIsNullAndIncomeListIsNullAndUser(User user);
+
     List<PeriodOfTime> findByLocalDate(LocalDate localDate);
 
 }

@@ -1,21 +1,15 @@
 package com.finplapp.controller;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.finplapp.DateMeasure;
-import com.finplapp.chartist.DatasOfLineDiagram;
-import com.finplapp.chartist.DatasOfPieChartDiagrams;
-import com.finplapp.chartist.JsonProviderOfDataForDiagrams;
-import com.finplapp.chartist.ProviderOfDataForDiagrams;
+import com.finplapp.LocalDateHandler;
+import com.finplapp.PeriodOfTimeHandler;
+import com.finplapp.UserHandler;
+import com.finplapp.chartist.*;
 import com.finplapp.model.*;
 import com.finplapp.service.*;
 import org.slf4j.Logger;
@@ -24,10 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 
-import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.stereotype.Controller;
@@ -59,8 +51,8 @@ public class AppController {
     @Autowired
     private PersistentTokenBasedRememberMeServices persistentTokenBasedRememberMeServices;
 
-    @Autowired
-    private AuthenticationTrustResolver authenticationTrustResolver;
+    /*@Autowired
+    private AuthenticationTrustResolver authenticationTrustResolver;*/
 
     @Autowired
     private PersistentTokenRepository tokenRepository;
@@ -69,21 +61,39 @@ public class AppController {
     private PeriodOfTimeService periodOfTimeService;
 
     @Autowired
-    @Qualifier("costService")
-    private CostService costService;
+    @Qualifier("expenditureService")
+    private ExpenditureService expenditureService;
 
     @Autowired
     @Qualifier("incomeService")
     private IncomeService incomeService;
 
     @Autowired
-    private CostTypeService costTypeService;
+    private ExpenditureTypeService expenditureTypeService;
 
     @Autowired
     private IncomeTypeService incomeTypeService;
 
     @Autowired
-    private ProviderOfDataForDiagrams providerOfDataForDiagrams;
+    private DataConverter dataConverter;
+
+    @Autowired
+    private DataProducer dataProducerUserExpenditurePieChartDiagrams;
+
+    @Autowired
+    private DataProducer dataProducerUserIncomePieChartDiagrams;
+
+    @Autowired
+    private DataProducer dataProducerLineDiagram;
+
+    @Autowired
+    private LocalDateHandler localDateHandler;
+
+    @Autowired
+    private PeriodOfTimeHandler periodOfTimeHandler;
+
+    @Autowired
+    private UserHandler userHandler;
 
     private final String DEFAULT_DATE_MEASER_PAST = "WEEK";
     private final String DEFAULT_DATE_MEASER_FUTURE = "MONTH";
@@ -93,13 +103,12 @@ public class AppController {
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String mainPage(ModelMap model) {
 
-        String jString = providerOfDataForDiagrams.getData(getDatasOfLineDiagram(
-                DEFAULT_DATE_MEASER_PAST, DEFAULT_DATE_MEASER_FUTURE,
-                DEFAULT_DATE_QUANTITY_PAST, DEFAULT_DATE_QUANTITY_FUTURE));
+        String jString = dataConverter.getConvertedData(dataProducerLineDiagram.getData(localDateHandler.getTargetLocalDates(
+                DEFAULT_DATE_MEASER_PAST, DEFAULT_DATE_MEASER_FUTURE, DEFAULT_DATE_QUANTITY_PAST, DEFAULT_DATE_QUANTITY_FUTURE)));
 
-        model.addAttribute("dateNow", getLabelNowForGraf());
+        model.addAttribute("dateNow", localDateHandler.getLabelNowForGraf());
         model.addAttribute("dateMeasure", DateMeasure.values());
-        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("loggedinuser", userHandler.getPrincipal());
         model.addAttribute("data", jString);
         return "mainPage";
     }
@@ -120,16 +129,18 @@ public class AppController {
             afterNow = DEFAULT_DATE_QUANTITY_FUTURE;
         }
 
-        String jString = new JsonProviderOfDataForDiagrams()
-                .getData(getDatasOfLineDiagram(measureTypeP, measureTypeF, beforeNow, afterNow));
+        String jString = new JsonDataConverter()
+                .getConvertedData(dataProducerLineDiagram.getData(localDateHandler.getTargetLocalDates(
+                        measureTypeP, measureTypeF, beforeNow, afterNow)));
+
 
         model.addAttribute("beforeNow", beforeNow);
         model.addAttribute("afterNow", afterNow);
         model.addAttribute("measureTypeP", DateMeasure.valueOf(measureTypeP));
         model.addAttribute("measureTypeF", DateMeasure.valueOf(measureTypeF));
-        model.addAttribute("dateNow", getLabelNowForGraf());
+        model.addAttribute("dateNow", localDateHandler.getLabelNowForGraf());
         model.addAttribute("dateMeasure", DateMeasure.values());
-        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("loggedinuser", userHandler.getPrincipal());
         model.addAttribute("data", jString);
         return "mainPage";
     }
@@ -139,21 +150,21 @@ public class AppController {
 
         List<User> users = userService.findAllUsers();
         model.addAttribute("users", users);
-        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("loggedinuser", userHandler.getPrincipal());
         return "userslist";
     }
 
-    //======================Events=================================
+    //======================Events================================
 
     @RequestMapping("getEvents")
     public String getEvents() {
-        updateDatasOfPeriod(getSortedPeriodOfTimeList());
+        periodOfTimeHandler.updateDatasOfPeriod(periodOfTimeHandler.getSortedPeriodOfTimeList());
         return "getEvents";
     }
 
     @RequestMapping("getAllEventOfDate")
     public String getAllEventOfDate(@RequestParam("dates") String dates, ModelMap model) {
-        List<PeriodOfTime> periodOfTimes = getActualPeriodsOfTime(getAllDatesOfPeriod(getFirstAndLastDaysWihtString(dates)));
+        List<PeriodOfTime> periodOfTimes = periodOfTimeHandler.getActualPeriodsOfTime(localDateHandler.getAllDatesOfPeriod(dates));
         model.addAttribute("periodOfTimes", periodOfTimes);
         model.addAttribute("dates", dates);
         return "eventsList";
@@ -161,49 +172,48 @@ public class AppController {
     }
     //====================End Events=============================
 
-    //======================Cost=================================
+    //======================Expenditure==========================
 
-    @RequestMapping(value = {"Cost"}, method = RequestMethod.GET)
-    public String pageCost(ModelMap model) {
-        model.addAttribute("costTypes", costTypeService.findAll());
-        return "costPage";
+    @RequestMapping(value = {"Expenditure"}, method = RequestMethod.GET)
+    public String pageExpenditure(ModelMap model) {
+        model.addAttribute("expenditureTypes", expenditureTypeService.findAll());
+        return "expenditurePage";
     }
 
-    @RequestMapping(value = "saveCost")
-    public String saveCost(@RequestParam("date") String date,
-                           @RequestParam("costTypes") String costTypes,
-                           @RequestParam("amount") String amount,
-                           @RequestParam("message") String message) {
+    @RequestMapping(value = "saveExpenditure")
+    public String saveExpenditure(@RequestParam("date") String date,
+                                  @RequestParam("expenditureTypes") String costTypes,
+                                  @RequestParam("amount") String amount,
+                                  @RequestParam("message") String message) {
+        Expenditure expenditure = new Expenditure();
+        expenditure.setAmount(Double.valueOf(amount));
+        expenditure.setMessage(message);
+        expenditure.setExpenditureType(expenditureTypeService.findByType(costTypes));
 
-        Cost cost = new Cost();
-        cost.setAmount(Double.valueOf(amount));
-        cost.setMessage(message);
-        cost.setCostType(costTypeService.findByType(costTypes));
-
-        User user = userService.findBySSO(getPrincipal());
-        PeriodOfTime periodOfTime = getNewOrOldPeriodOfTime(getLocalDateWithString(date), user);
-        cost.setPeriodOfTime(periodOfTime);
-        List<Cost> costList = periodOfTime.getCostList();
-        costList.add(cost);
-        periodOfTime.setCostList(costList);
+        User user = userService.findBySSO(userHandler.getPrincipal());
+        PeriodOfTime periodOfTime = periodOfTimeHandler.getNewOrOldPeriodOfTime(localDateHandler.getLocalDateWithString(date), user);
+        expenditure.setPeriodOfTime(periodOfTime);
+        List<Expenditure> costList = periodOfTime.getExpenditureList();
+        costList.add(expenditure);
+        periodOfTime.setExpenditureList(costList);
         periodOfTimeService.savePeriodOfTime(periodOfTime);
-        return "redirect:/Cost";
+        return "redirect:/Expenditure";
     }
 
-    @RequestMapping(value = "delete-cost")
-    public String deleteCost(@RequestParam("dates") String dates,
-                             @RequestParam("date") String date,
-                             @RequestParam("cost.id") Long id,
-                             ModelMap model) {
-        PeriodOfTime periodOfTime = periodOfTimeService.findByLocalDateAndUser(getLocalDateWithString(date), userService.findBySSO(getPrincipal()));
-        periodOfTime.getCostList().remove(costService.findCostById(id));
-        costService.deleteCost(id);
-        deleteAllEmptiesPeriodsOfUser(userService.findBySSO(getPrincipal()));
+    @RequestMapping(value = "delete-expenditure")
+    public String deleteExpenditure(@RequestParam("dates") String dates,
+                                    @RequestParam("date") String date,
+                                    @RequestParam("expenditure.id") Long id,
+                                    ModelMap model) {
+        PeriodOfTime periodOfTime = periodOfTimeService.findByLocalDateAndUser(localDateHandler.getLocalDateWithString(date), userService.findBySSO(userHandler.getPrincipal()));
+        periodOfTime.getExpenditureList().remove(expenditureService.findExpenditureById(id));
+        expenditureService.deleteExpenditure(id);
+        periodOfTimeHandler.deleteAllEmptiesPeriodsOfUser(userService.findBySSO(userHandler.getPrincipal()));
         model.addAttribute("dates", dates);
         return "redirect:/getAllEventOfDate";
     }
 
-    //===================End Cost=================================
+    //===================End Expenditure===========================
 
     //======================Income=================================
 
@@ -224,8 +234,8 @@ public class AppController {
         income.setMessage(message);
         income.setTypeIncome(incomeTypeService.findByType(incomeTypes));
 
-        User user = userService.findBySSO(getPrincipal());
-        PeriodOfTime periodOfTime = getNewOrOldPeriodOfTime(getLocalDateWithString(date), user);
+        User user = userService.findBySSO(userHandler.getPrincipal());
+        PeriodOfTime periodOfTime = periodOfTimeHandler.getNewOrOldPeriodOfTime(localDateHandler.getLocalDateWithString(date), user);
         income.setPeriodOfTime(periodOfTime);
         List<Income> incomeList = periodOfTime.getIncomeList();
         incomeList.add(income);
@@ -239,17 +249,15 @@ public class AppController {
                                @RequestParam("date") String date,
                                @RequestParam("income.id") Long id,
                                ModelMap model) {
-        PeriodOfTime periodOfTime = periodOfTimeService.findByLocalDateAndUser(getLocalDateWithString(date), userService.findBySSO(getPrincipal()));
+        PeriodOfTime periodOfTime = periodOfTimeService.findByLocalDateAndUser(localDateHandler.getLocalDateWithString(date), userService.findBySSO(userHandler.getPrincipal()));
         periodOfTime.getIncomeList().remove(incomeService.findIncomeById(id));
         incomeService.deleteIncome(id);
-        deleteAllEmptiesPeriodsOfUser(userService.findBySSO(getPrincipal()));
+        periodOfTimeHandler.deleteAllEmptiesPeriodsOfUser(userService.findBySSO(userHandler.getPrincipal()));
         model.addAttribute("dates", dates);
         return "redirect:/getAllEventOfDate";
     }
 
     //===================End Income=================================
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     @RequestMapping(value = "userStatistics")
     public String userStatistics(ModelMap model) {
@@ -259,98 +267,15 @@ public class AppController {
     @RequestMapping(value = "getUserStatistics")
     public String userPrintStatistics(@RequestParam("dates") String dates,
                                       ModelMap model) {
-        String jString = providerOfDataForDiagrams.getData(getDatasOfPieChartDiagrams(dates, "Cost"));
-        String jString2 = providerOfDataForDiagrams.getData(getDatasOfPieChartDiagrams(dates, "Income"));
+
+        String jString = dataConverter.getConvertedData(dataProducerUserExpenditurePieChartDiagrams.getData(localDateHandler.getAllDatesOfPeriod(dates)));
+        String jString2 = dataConverter.getConvertedData(dataProducerUserIncomePieChartDiagrams.getData(localDateHandler.getAllDatesOfPeriod(dates)));
+
         model.addAttribute("dates", dates);
         model.addAttribute("data", jString);
         model.addAttribute("data2", jString2);
         return "userStatistics";
     }
-
-    private DatasOfPieChartDiagrams getDatasOfPieChartDiagrams(String dates, String extenderLedger) {
-        Map<? extends LedgerEntryType, List<? extends Ledger>> map = getMapOfLedgerListsByTypes(getAllDatesOfPeriod(getFirstAndLastDaysWihtString(dates)), extenderLedger);
-        List<String> labels = new ArrayList();
-        List<Double> series = new ArrayList();
-        List<LedgerEntryType> types = map.keySet().stream().collect(Collectors.toList());
-        Collections.sort(types, (o1, o2) -> o1.getId().compareTo(o2.getId()));
-        for (LedgerEntryType type : types
-        ) {
-            if (!map.get(type).isEmpty()) {
-                labels.add(type.getType());
-                series.add(getSumAmount(map.get(type)));
-            }
-        }
-        return new DatasOfPieChartDiagrams(labels, series);
-    }
-
-    private Double getSumAmount(List<? extends Ledger> ledgers) {
-
-        Double sum = 0.0;
-
-        for (Ledger ledger : ledgers
-        ) {
-            sum += ledger.getAmount();
-        }
-        return sum;
-    }
-
-    private Map<? extends LedgerEntryType, List<? extends Ledger>> getMapOfLedgerListsByTypes(List<LocalDate> localDates, String extenderLedger) {
-
-        User user = userService.findBySSO(getPrincipal());
-
-        Map<LedgerEntryType, List<? extends Ledger>> stringListMap = new HashMap<>();
-
-        List<? extends LedgerEntryType> ledgerEntryTypeList = getLedgerEntryTypeList(extenderLedger);
-
-        for (LocalDate date : localDates
-        ) {
-            for (LedgerEntryType type : ledgerEntryTypeList
-            ) {
-                if (stringListMap.containsKey(type)) {
-                    stringListMap.get(type).addAll(getListByPeriodOfTimeAndType(user, date, type, extenderLedger));
-                } else {
-                    stringListMap.put(type, getListByPeriodOfTimeAndType(user, date, type, extenderLedger));
-                }
-            }
-        }
-        return stringListMap;
-    }
-
-    private List getListByPeriodOfTimeAndType(User user, LocalDate date, LedgerEntryType type, String extenderLedger) {
-        List list;
-        switch (extenderLedger) {
-
-            case "Cost":
-                list = costService.findByPeriodOfTimeAndCostType(periodOfTimeService.findByLocalDateAndUser(date, user), type);
-                break;
-            case "Income":
-                list = incomeService.findByPeriodOfTimeAndIncomeType(periodOfTimeService.findByLocalDateAndUser(date, user), type);
-                break;
-            default:
-                list = null;
-                logger.error("Wrong name of extender Ledger...");
-        }
-        return list;
-    }
-
-    private List<? extends LedgerEntryType> getLedgerEntryTypeList(String extenderLedger) {
-
-        List<? extends LedgerEntryType> types;
-
-        switch (extenderLedger) {
-            case "Cost":
-                types = costTypeService.findAll();
-                break;
-            case "Income":
-                types = incomeTypeService.findAll();
-                break;
-            default:
-                types = null;
-                logger.error("wrong name of extender Ledger");
-        }
-        return types;
-    }
-    //????????????????????????????????????????????????????????????????????????
 
     /**
      * This method will provide the medium to add a new user.
@@ -361,7 +286,7 @@ public class AppController {
         System.out.println(user.getUserProfiles());
         model.addAttribute("user", user);
         model.addAttribute("edit", false);
-        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("loggedinuser", userHandler.getPrincipal());
         return "registration";
     }
 
@@ -386,7 +311,7 @@ public class AppController {
         userProfiles.add(userProfileService.findByType("USER"));
         user.setUserProfiles(userProfiles);
         userService.saveUser(user);
-        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("loggedinuser", userHandler.getPrincipal());
         return "registrationsuccess";
     }
 
@@ -399,7 +324,7 @@ public class AppController {
         model.addAttribute("user", user);
         model.addAttribute("roles", userProfileService.findAll());
         model.addAttribute("edit", true);
-        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("loggedinuser", userHandler.getPrincipal());
         return "registration";
     }
 
@@ -415,7 +340,7 @@ public class AppController {
             return "registration";
         }
         userService.updateUser(user);
-        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("loggedinuser", userHandler.getPrincipal());
         return "registrationsuccess";
     }
 
@@ -442,7 +367,7 @@ public class AppController {
      */
     @RequestMapping(value = "/Access_Denied", method = RequestMethod.GET)
     public String accessDeniedPage(ModelMap model) {
-        model.addAttribute("loggedinuser", getPrincipal());
+        model.addAttribute("loggedinuser", userHandler.getPrincipal());
         return "accessDenied";
     }
 
@@ -452,7 +377,7 @@ public class AppController {
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String loginPage() {
-        if (isCurrentAuthenticationAnonymous()) {
+        if (userHandler.isCurrentAuthenticationAnonymous()) {
             return "login";
         } else {
             return "redirect:/";
@@ -472,197 +397,5 @@ public class AppController {
             SecurityContextHolder.getContext().setAuthentication(null);
         }
         return "redirect:/login?logout";
-    }
-
-    /**
-     * This method returns the principal[user-name] of logged-in user.
-     */
-    private String getPrincipal() {
-        String userName = null;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            userName = ((UserDetails) principal).getUsername();
-        } else {
-            userName = principal.toString();
-        }
-        return userName;
-    }
-
-    /**
-     * This method returns true if users is already authenticated [logged-in], else false.
-     */
-    private boolean isCurrentAuthenticationAnonymous() {
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authenticationTrustResolver.isAnonymous(authentication);
-    }
-
-    private PeriodOfTime getNewOrOldPeriodOfTime(LocalDate localDate, User user) {
-        PeriodOfTime findPeriodOfTime = periodOfTimeService.findByLocalDateAndUser(localDate, user);
-        if (findPeriodOfTime == null) {
-            PeriodOfTime newPeriodOfTime = new PeriodOfTime();
-            newPeriodOfTime.setUser(user);
-            newPeriodOfTime.setLocalDate(localDate);
-            return newPeriodOfTime;
-        } else {
-            return findPeriodOfTime;
-        }
-    }
-
-    private void updateDatasOfPeriod(List<PeriodOfTime> periodOfTimes) {
-        for (int i = 0; i < periodOfTimes.size(); i++) {
-            Double calculationOfPeriod = getSumEventsOfPeridofTime(periodOfTimes.get(i).getIncomeList()) - getSumEventsOfPeridofTime(periodOfTimes.get(i).getCostList());
-            if (i != 0) {
-                periodOfTimes.get(i).setBalance(periodOfTimes.get(i - 1).getBalance() + calculationOfPeriod);
-            } else {
-                periodOfTimes.get(i).setBalance(calculationOfPeriod);
-            }
-            periodOfTimeService.updatePeriodOfTime(periodOfTimes.get(i));
-        }
-    }
-
-    private List<PeriodOfTime> getSortedPeriodOfTimeList() {
-        List<PeriodOfTime> periodOfTimes = (List<PeriodOfTime>) periodOfTimeService.findByUser(userService.findBySSO(getPrincipal()));
-        periodOfTimes.sort((o1, o2) -> o1.compareTo(o2));
-        return periodOfTimes;
-    }
-
-    private Double getSumEventsOfPeridofTime(List<? extends Ledger> ledgersList) {
-        Double sum = 0.0;
-        for (Ledger ledger : ledgersList
-        ) {
-            sum += ledger.getAmount();
-        }
-        return sum;
-    }
-
-    private List<Double> getBalanceListAllPeriods(List<PeriodOfTime> periodOfTimes) {
-        List<Double> balanseList = new ArrayList<>();
-        for (PeriodOfTime periodOfTime : periodOfTimes
-        ) {
-            balanseList.add(periodOfTime.getBalance());
-        }
-        return balanseList;
-    }
-
-    private List<String> getTimeStepAllPeriodForGraf(List<PeriodOfTime> periodOfTimes) {
-        List<String> timeSteps = new ArrayList<>();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy");
-        for (PeriodOfTime periodOfTime : periodOfTimes
-        ) {
-            timeSteps.add(periodOfTime.getLocalDate().format(dateTimeFormatter));
-        }
-        return timeSteps;
-    }
-
-    private String getLabelNowForGraf() {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy");
-        return LocalDate.now().format(dateTimeFormatter);
-    }
-
-
-    private LocalDate getLocalDateWithString(String date) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("[MM/dd/yyyy][yyyy-MM-dd]");
-        LocalDate localDate = LocalDate.parse(date, dateTimeFormatter);
-        return localDate;
-    }
-
-    private List<String> getFirstAndLastDaysWihtString(String datesSring) {
-        return Stream.of(datesSring.split(" - "))
-                .map(elem -> new String(elem))
-                .collect(Collectors.toList());
-    }
-
-    private List<LocalDate> getAllDatesOfPeriod(List<String> dates) {
-        ArrayList<LocalDate> localDates = new ArrayList<>();
-
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        LocalDate theFirstDay = LocalDate.parse(dates.get(0), dateTimeFormatter);
-        LocalDate thelastDay = LocalDate.parse(dates.get(1), dateTimeFormatter);
-
-        long days = ChronoUnit.DAYS.between(theFirstDay, thelastDay);
-        long oneDeyForCorrectWork = 1L;
-        for (long i = 0; i < days + oneDeyForCorrectWork; i++) {
-            localDates.add(theFirstDay.plusDays(i));
-        }
-        return localDates;
-    }
-
-    private List<PeriodOfTime> getActualPeriodsOfTime(List<LocalDate> localDates) {
-        List<PeriodOfTime> periodOfTimes = new ArrayList<>();
-        for (LocalDate localDate : localDates
-        ) {
-            PeriodOfTime periodOfTime = periodOfTimeService.findByLocalDateAndUser(localDate, userService.findBySSO(getPrincipal()));
-            if (periodOfTime != null) {
-                periodOfTimes.add(periodOfTime);
-            }
-        }
-        return periodOfTimes;
-    }
-
-    private void deleteAllEmptiesPeriodsOfUser(User user) {
-        List<PeriodOfTime> periodOfTimes = periodOfTimeService.findEmptiesPeriods(user);
-        for (PeriodOfTime period : periodOfTimes
-        ) {
-            periodOfTimeService.deletePeriodOfTime(period);
-        }
-    }
-
-    private LocalDate getLocalDateByDateMeasure(DateMeasure dateMeasure, long quantity) {
-        LocalDate localDate = LocalDate.now();
-        switch (dateMeasure) {
-            case DAY:
-                return localDate.plusDays(quantity);
-            case WEEK:
-                return localDate.plusWeeks(quantity);
-            case MONTH:
-                return localDate.plusMonths(quantity);
-            case YEAR:
-                return localDate.plusYears(quantity);
-            default:
-                return null;
-        }
-    }
-
-    private List<LocalDate> getAllDatesOfPeriod(LocalDate dayBefore, LocalDate dayAfter) {
-        ArrayList<LocalDate> localDates = new ArrayList<>();
-        LocalDate theDayNow = LocalDate.now();
-        long day1 = ChronoUnit.DAYS.between(theDayNow, dayBefore);
-        long day2 = ChronoUnit.DAYS.between(theDayNow, dayAfter);
-        long oneDeyForCorrectWork = 1L;
-        for (long i = day1; i < day2 + oneDeyForCorrectWork; i++) {
-            localDates.add(theDayNow.plusDays(i));
-        }
-        return localDates;
-    }
-
-    private List<PeriodOfTime> getLimitedListPeriodOfTime(List<PeriodOfTime> periodOfTimes, List<LocalDate> localDates) {
-        List<PeriodOfTime> periods = new ArrayList<>();
-        for (PeriodOfTime period : periodOfTimes
-        ) {
-            if (localDates.contains(period.getLocalDate())) {
-                periods.add(period);
-            }
-        }
-        return periods;
-    }
-
-    private DatasOfLineDiagram getDatasOfLineDiagram(String dateMeaserePast, String dateMeasereFuture,
-                                                     long dateQuantityPast, long dateQuantityFuture) {
-        List<PeriodOfTime> periodOfTimes = getSortedPeriodOfTimeList();
-        updateDatasOfPeriod(periodOfTimes);
-        periodOfTimes = getLimitedListPeriodOfTime(periodOfTimes,
-                getTargetLocalDates(dateMeaserePast, dateMeasereFuture, dateQuantityPast, dateQuantityFuture));
-
-        List<List> lists = new ArrayList<>();
-        lists.add(getBalanceListAllPeriods(periodOfTimes));
-        return new DatasOfLineDiagram(getTimeStepAllPeriodForGraf(periodOfTimes), lists);
-    }
-
-    private List<LocalDate> getTargetLocalDates(String dateMeaserePast, String dateMeasereFuture,
-                                                long dateQuantityPast, long dateQuantityFuture) {
-        List<LocalDate> targetLocalDates = getAllDatesOfPeriod(
-                getLocalDateByDateMeasure(DateMeasure.valueOf(dateMeaserePast), -(dateQuantityPast)),
-                getLocalDateByDateMeasure(DateMeasure.valueOf(dateMeasereFuture), dateQuantityFuture));
-        return targetLocalDates;
     }
 }

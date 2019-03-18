@@ -34,7 +34,7 @@ public class DataInit {
     private UserService userService;
 
     @Autowired
-    private CostTypeService costTypeService;
+    private ExpenditureTypeService expenditureTypeService;
 
     @Autowired
     private IncomeTypeService incomeTypeService;
@@ -44,10 +44,9 @@ public class DataInit {
     @PostConstruct
     private void init() {
         addProfileTypesDataToDB();
-        addSuperUserDataToDB();
         addAdminDataToDB();
         addAnalystDataToDB();
-        addLedgerTipesToDB(costTypeService, new CostType(), "default.cost.type");
+        addLedgerTipesToDB(expenditureTypeService, new ExpenditureType(), "default.expenditure.type");
         addLedgerTipesToDB(incomeTypeService, new IncomeType(), "default.income.type");
     }
 
@@ -80,22 +79,6 @@ public class DataInit {
     private String[] getArrayOfProperties(String s) {
         String regex = ",";
         return s.split(regex);
-    }
-
-    private void addSuperUserDataToDB() {
-        if (userService.findBySSO(environment.getProperty("data.s.admin.sso_id")) == null) {
-            User user = new User();
-            user.setSsoId(environment.getProperty("data.s.admin.sso_id"));
-            user.setEmail(environment.getProperty("data.s.admin.email"));
-            user.setPassword(environment.getProperty("data.s.admin.password"));
-
-            Set<UserProfile> userProfiles = new HashSet<>();
-            userProfiles.add(userProfileService.findByType("ADMIN"));
-            userProfiles.add(userProfileService.findByType("ANALYST"));
-            userProfiles.add(userProfileService.findByType("USER"));
-            user.setUserProfiles(userProfiles);
-            userService.saveUser(user);
-        }
     }
 
     private void addAdminDataToDB() {

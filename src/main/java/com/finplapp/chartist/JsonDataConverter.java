@@ -6,13 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-@Service("providerOfDataForDiagrams")
-public class JsonProviderOfDataForDiagrams implements ProviderOfDataForDiagrams {
+@Service("dataConverter")
+public class JsonDataConverter implements DataConverter {
 
-    static final Logger logger = LoggerFactory.getLogger(JsonProviderOfDataForDiagrams.class);
+    static final Logger logger = LoggerFactory.getLogger(JsonDataConverter.class);
 
     @Override
-    public String getData(DataOfDiagrams dataOfDiagrams) {
+    public String getConvertedData(DataOfDiagrams dataOfDiagrams) {
         try {
             return new ObjectMapper().writeValueAsString(dataOfDiagrams);
         } catch (JsonProcessingException e) {

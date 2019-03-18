@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.finplapp.model.UserProfile;
 
-
 public interface UserProfileService {
 
 	UserProfile findById(int id);
