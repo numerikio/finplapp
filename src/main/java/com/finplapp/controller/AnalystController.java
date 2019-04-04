@@ -117,6 +117,4 @@ public class AnalystController {
 
         return "redirect:categories";
     }
-
-
 }
